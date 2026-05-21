@@ -3234,6 +3234,8 @@ window.switchTab = function(tabName) {
     window.renderWeeklyUtilizationChart();
   } else if (tabName === 'admin-hub') {
     window.renderAdminHubView();
+  } else if (tabName === 'mos-catalog') {
+    window.renderMosCatalog();
   }
 };
 
@@ -7322,6 +7324,156 @@ window.populateMatrixFiltersFromCatalog = function() {
   }
 
   window.logAction('SUCCESS', `Menu of Service Catalog: Dynamically populated matrix filter selectors from live Spanner tables.`);
+};
+
+// --- MoS CATALOG VIEWER INTERACTIVE RENDERERS (Reconstruction Step 3 & 4) ---
+window.renderMosCatalog = function() {
+  const grid = document.getElementById('mos-catalog-cards-grid');
+  const categorySelect = document.getElementById('mos-filter-category');
+  
+  if (!grid || !state.mosTopics || !state.mosCamps) return;
+
+  // 1. Dynamically populate category filter once on boot
+  if (categorySelect && categorySelect.children.length === 1) {
+    const cats = [...new Set(state.mosCamps.map(c => c.category))];
+    cats.forEach(cat => {
+      const opt = document.createElement('option');
+      opt.value = cat;
+      opt.textContent = cat;
+      categorySelect.appendChild(opt);
+    });
+  }
+
+  // 2. Get active filter states
+  const search = document.getElementById('mos-search-input') ? document.getElementById('mos-search-input').value.toLowerCase().trim() : '';
+  const goalFilter = document.getElementById('mos-filter-goal') ? document.getElementById('mos-filter-goal').value : 'ALL';
+  const catFilter = document.getElementById('mos-filter-category') ? document.getElementById('mos-filter-category').value : 'ALL';
+
+  grid.innerHTML = '';
+
+  // 3. Join & filter catalog topics E2E
+  const filteredTopics = state.mosTopics.filter(topic => {
+    const camp = state.mosCamps.find(c => c.campId === topic.campId);
+    if (!camp) return false;
+
+    // Filter Strategic Goal
+    if (goalFilter !== 'ALL' && camp.strategicGoal !== goalFilter) return false;
+
+    // Filter Category
+    if (catFilter !== 'ALL' && camp.category !== catFilter) return false;
+
+    // Filter Text Search
+    if (search) {
+      const matchName = topic.topicName.toLowerCase().includes(search);
+      const matchBfm = topic.targetBfm.toLowerCase().includes(search);
+      const matchDeck = (topic.baseDeckTitle || '').toLowerCase().includes(search);
+      if (!matchName && !matchBfm && !matchDeck) return false;
+    }
+
+    return true;
+  });
+
+  if (filteredTopics.length === 0) {
+    grid.innerHTML = '<div style="grid-column: 1/-1; font-size: 0.85rem; color: var(--text-muted); text-align: center; padding: 3rem; background: rgba(255,255,255,0.01); border: 1px dashed var(--border-light); border-radius: 8px;">No curriculum topics match your active catalog filters.</div>';
+    return;
+  }
+
+  filteredTopics.forEach(topic => {
+    const camp = state.mosCamps.find(c => c.campId === topic.campId);
+    const isActivate = camp.strategicGoal === 'Activate';
+    
+    const goalBadgeColor = isActivate ? 'var(--success-green)' : 'var(--primary-cyan)';
+    const levelColor = topic.activationPath === '101' ? 'rgba(66,133,244,0.15)' : 'rgba(139,92,246,0.15)';
+    const levelTxtColor = topic.activationPath === '101' ? 'var(--g-blue)' : 'var(--accent-purple)';
+
+    grid.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="background: var(--g-bg-surface); border: 1px solid var(--g-border); border-radius: 8px; padding: 1.25rem; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.15); transition: transform 0.2s, border-color 0.2s;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem; flex-wrap: wrap;">
+            <span style="font-size: 0.62rem; font-weight: 800; color: ${goalBadgeColor}; border: 1px solid ${goalBadgeColor}30; background: ${goalBadgeColor}0c; padding: 0.15rem 0.45rem; border-radius: 4px;">${camp.strategicGoal.toUpperCase()} FOCUS</span>
+            <span style="font-size: 0.62rem; font-weight: 800; color: ${levelTxtColor}; background: ${levelColor}; padding: 0.15rem 0.45rem; border-radius: 4px;">${topic.activationPath} TIER</span>
+          </div>
+          <h4 style="font-size: 0.88rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.35rem 0; line-height: 1.3;">${topic.topicName}</h4>
+          <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 0.5rem;">Curriculum: ${camp.campName}</span>
+          <p style="font-size: 0.72rem; color: var(--text-secondary); margin: 0; line-height: 1.4; border-top: 1px dashed var(--border-light); padding-top: 0.5rem;">
+            ⏱️ Duration: <strong>${topic.durationMinutes} Mins</strong><br>
+            📈 Target Metric: <strong style="color: var(--warning-amber);">${topic.targetBfm}</strong>
+          </p>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
+          <span style="font-size: 0.68rem; color: var(--text-muted); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${topic.baseDeckTitle}">📁 Deck: ${topic.baseDeckTitle}</span>
+          <button class="btn btn-primary-sm" onclick="window.nominateCampFromCatalog('${topic.topicId}')" style="width: 100%; font-size: 0.7rem; padding: 0.4rem; font-weight: 800; border-radius: 6px; cursor: pointer; background: var(--g-blue); color:#fff; border:none; box-shadow: 0 4px 10px rgba(66,133,244,0.2);">➕ Nominate Partner for this Camp</button>
+        </div>
+      </div>
+    `);
+  });
+};
+
+window.filterMosCatalog = function() {
+  window.renderMosCatalog();
+};
+
+window.nominateCampFromCatalog = function(topicId) {
+  // 1. Switch to Cases Ingestion Sandbox
+  window.switchTab('cases');
+  
+  // 2. Pre-select topic inside scheduler form inputs
+  const select = document.getElementById('cases-topic-input');
+  if (select) {
+    select.value = topicId;
+    showToast('Topic Nominated 🚀', 'Selected topic programmatically synced to Ingestion Form!');
+  }
+};
+
+// --- CLIENT VIEW: COLLAPSIBLE AGENCY MENU OF SERVICES VIEW ---
+window.toggleAgencyMosCatalog = function() {
+  const body = document.getElementById('agency-mos-console-body');
+  const arrow = document.getElementById('agency-mos-accordion-arrow');
+  
+  if (!body || !arrow) return;
+
+  const isHidden = body.style.display === 'none';
+  
+  if (isHidden) {
+    body.style.display = 'block';
+    arrow.textContent = "▲ Collapse Menu of Services Catalog";
+    window.renderAgencyMosCatalog();
+  } else {
+    body.style.display = 'none';
+    arrow.textContent = "▼ Expand Menu of Services Catalog";
+  }
+};
+
+window.renderAgencyMosCatalog = function() {
+  const container = document.getElementById('agency-mos-catalog-cards-container');
+  if (!container || !state.mosTopics || !state.mosCamps) return;
+
+  container.innerHTML = '';
+
+  state.mosTopics.forEach(topic => {
+    const camp = state.mosCamps.find(c => c.campId === topic.campId);
+    const isActivate = camp.strategicGoal === 'Activate';
+    const goalBadgeColor = isActivate ? 'var(--success-green)' : 'var(--primary-cyan)';
+    const levelTxtColor = topic.activationPath === '101' ? 'var(--g-blue)' : 'var(--accent-purple)';
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-light); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; justify-content: space-between; gap: 0.75rem;">
+        <div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+            <span style="font-size: 0.58rem; font-weight: 800; color: ${goalBadgeColor}; border: 1px solid ${goalBadgeColor}30; background: ${goalBadgeColor}08; padding: 0.1/rem 0.35rem; border-radius: 3px;">${camp.strategicGoal.toUpperCase()}</span>
+            <span style="font-size: 0.58rem; font-weight: 800; color: ${levelTxtColor}; background: rgba(255,255,255,0.03); padding: 0.1rem 0.35rem; border-radius: 3px;">${topic.activationPath} TIER</span>
+          </div>
+          <h4 style="font-size: 0.8rem; font-weight: 700; color: var(--text-primary); margin: 0 0 0.25rem 0; line-height: 1.25;">${topic.topicName}</h4>
+          <span style="font-size: 0.68rem; color: var(--text-muted); display: block;">Curriculum: ${camp.campName}</span>
+        </div>
+        <div style="font-size: 0.7rem; color: var(--text-secondary); line-height: 1.3; border-top: 1px dashed var(--border-light); padding-top: 0.5rem; margin-top: 0.25rem;">
+          ⏱️ Workshop Duration: <strong>${topic.durationMinutes} Mins</strong><br>
+          📈 Product Metric: <strong style="color: var(--warning-amber);">${topic.targetBfm}</strong>
+        </div>
+      </div>
+    `);
+  });
 };
 
 

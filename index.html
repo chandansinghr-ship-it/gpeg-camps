@@ -90,6 +90,11 @@
 
           <div class="rail-group-header">Resources & Roster</div>
 
+          <button class="rail-nav-item" id="nav-mos-catalog" onclick="switchTab('mos-catalog')">
+            <span class="rail-nav-icon">📖</span>
+            <span class="rail-nav-label">Menu of Services (MoS)</span>
+          </button>
+
           <button class="rail-nav-item" id="nav-definitions" onclick="switchTab('definitions')">
             <span class="rail-nav-icon">📖</span>
             <span class="rail-nav-label">Definitions</span>
@@ -1407,17 +1412,23 @@
           <p>This is the secure, external-facing page accessed by the agency using the dynamic URL link provided during the Pre-Camp Kickoff.</p>
         </div>
 
-        <!-- 📖 GPEG Curriculum Portfolio & Menu of Services (MoS) Catalog Banner -->
-        <div style="margin-bottom: 1.25rem; background: rgba(139,92,246,0.05); border: 1px solid rgba(139,92,246,0.15); padding: 0.85rem 1.25rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 1.5rem; max-width: 1000px; width: 100%; box-sizing: border-box;">
-          <div>
-            <strong style="font-size: 0.82rem; color: var(--accent-purple); display: flex; align-items: center; gap: 0.25rem;">
-              <span>📖 GPEG Curriculum Portfolio & Menu of Services (MoS)</span>
-            </strong>
-            <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0.15rem 0 0 0; line-height: 1.3;">Explore GPEG's authoritative catalog of training workshops, customized curriculum tracks, duration guidelines, and target campaign metrics.</p>
+        <!-- 📖 GPEG Curriculum Portfolio & Menu of Services (MoS) Inline Catalog Viewer -->
+        <div class="db-catalog-box" style="max-width: 1000px; width: 100%; margin-bottom: 1.5rem; border-color: var(--accent-purple); background: rgba(139,92,246,0.005);">
+          <button class="db-accordion-btn" onclick="window.toggleAgencyMosCatalog()" style="background: rgba(139,92,246,0.03); padding: 0.75rem 1.25rem; display: flex; justify-content: space-between; width: 100%; border: none; cursor: pointer; align-items: center;">
+            <span style="display: flex; align-items: center; gap: 0.5rem; color: var(--accent-purple); font-weight: 800; font-size: 0.82rem;">
+              <span>📖 GPEG 2026 Menu of Services (MoS) Catalog</span>
+            </span>
+            <span id="agency-mos-accordion-arrow" style="font-size: 0.75rem; transition: transform 0.3s; color: var(--accent-purple);">▼ Expand Menu of Services Catalog</span>
+          </button>
+          
+          <div class="db-console-body" id="agency-mos-console-body" style="display: none; padding: 1.25rem; border-top: 1px solid var(--border-light);">
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.45;">
+              Browse GPEG's complete 2026 curriculum offerings directly inside GPEG portal! Check out active workshop topics, standard slide presentations, and estimated durations:
+            </p>
+            <div id="agency-mos-catalog-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1rem;">
+              <!-- Dynamic agency catalog cards populate here -->
+            </div>
           </div>
-          <a href="https://docs.google.com/spreadsheets/d/18iBF9h9-EwVPEq8tIAPoUKSBblP2eo9Un4-F96M7f28/edit?resourcekey=0-v9gRHghnsYxv0AN8-zXMTA&gid=0#gid=0" target="_blank" class="btn-sm" style="background: var(--accent-purple); color: #fff; border: none; padding: 0.4rem 0.75rem; font-weight: 800; font-size: 0.68rem; display: inline-flex; align-items: center; gap: 0.25rem; text-decoration: none; border-radius: 4px; cursor: pointer; white-space: nowrap; height: 26px; box-sizing: border-box;">
-            <span>Open Catalog</span> ➔
-          </a>
         </div>
 
         <!-- 🔒 Secure Auth Gateway (Tenant Isolation verification screen) -->
@@ -2604,6 +2615,34 @@
           </div>
         </div>
 
+      </div>
+    </div>
+
+    <!-- SECTION 10📖: INTERACTIVE MENU OF SERVICES (MoS) CATALOG VIEWER -->
+    <div id="view-mos-catalog" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+          <div>
+            <h2>📖 GPEG 2026 Menu of Services (MoS) Catalog</h2>
+            <p>Authoritative inventory of specialized campaign upskilling workshops, baseline presentation decks, and target product adoption (BFM) metrics.</p>
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <select id="mos-filter-goal" class="form-control" onchange="window.filterMosCatalog()" style="font-size: 0.75rem; width: 150px; height: 32px; margin-bottom:0; border-radius: 4px;">
+              <option value="ALL">-- All Strategic Goals --</option>
+              <option value="Activate">Activate (Adopt)</option>
+              <option value="Obviate">Obviation (Hotspot)</option>
+            </select>
+            <select id="mos-filter-category" class="form-control" onchange="window.filterMosCatalog()" style="font-size: 0.75rem; width: 140px; height: 32px; margin-bottom:0; border-radius: 4px;">
+              <option value="ALL">-- All Categories --</option>
+            </select>
+            <input type="text" id="mos-search-input" placeholder="Search topics, decks, metrics..." oninput="window.filterMosCatalog()" class="form-control" style="font-size: 0.75rem; width: 220px; height: 32px; margin-bottom:0; border-radius: 4px;">
+          </div>
+        </div>
+
+        <!-- Interactive Catalog Cards Grid -->
+        <div class="repository-grid" id="mos-catalog-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.25rem;">
+          <!-- Dynamically loaded catalog cards inject here -->
+        </div>
       </div>
     </div>
 
