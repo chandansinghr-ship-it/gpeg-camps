@@ -4149,7 +4149,47 @@ window.submitChatBotMessage = function() {
     const q = query.toLowerCase();
 
     if (q.includes('help')) {
-      replyText = "I support these commands:\n• `@GPEG-Bot status <agency>` (check case stage)\n• `@GPEG-Bot active` (count active pipeline cases)\n• `@GPEG-Bot alerts` (count SLA warnings)\n• `@GPEG-Bot schedule` (list scheduled Gcal sessions)\n• `@GPEG-Bot link <case_id>` (fetch discovery profile survey links)\n• `@GPEG-Bot resolve <bug_id> \"<answer>\"` (directly resolve Buganizer tickets)";
+      replyText = "I support these commands:\n• `@GPEG-Bot critical` (scan active pipeline for critical bottlenecks)\n• `@GPEG-Bot status <agency>` (check case stage)\n• `@GPEG-Bot active` (count active pipeline cases)\n• `@GPEG-Bot alerts` (count SLA warnings)\n• `@GPEG-Bot schedule` (list scheduled Gcal sessions)\n• `@GPEG-Bot link <case_id>` (fetch discovery profile survey links)\n• `@GPEG-Bot resolve <bug_id> \"<answer>\"` (directly resolve Buganizer tickets)";
+    } else if (q.includes('critical') || q.includes('action') || q.includes('attention')) {
+      let criticalList = [];
+
+      // 1. Scan for SLA breaches or near breaches
+      state.camps.forEach(c => {
+        if (c.stage === 'pre-camp' && c.discoveryStatus === 'Pending') {
+          if (c.slaDaysRemaining <= 0 || c.slaBreached) {
+            criticalList.push(`⚠️ *[SLA BREACHED]* *${c.agency}* discovery form deadline passed. Customization revoked! <span onclick="window.switchTab('mail'); window.swapMailTemplate('discovery');" style="cursor:pointer; text-decoration:underline; color:var(--primary-cyan); font-weight:700;">[Draft Chase Email ✉️]</span>`);
+          } else if (c.slaDaysRemaining <= 2) {
+            criticalList.push(`⏱️ *[SLA Warning]* *${c.agency}* has only _${c.slaDaysRemaining}d left_ for discovery. <span onclick="window.switchTab('pipeline');" style="cursor:pointer; text-decoration:underline; color:var(--primary-cyan); font-weight:700;">[View Card 📋]</span>`);
+          }
+        }
+      });
+
+      // 2. Scan for Presenter Overlaps
+      const scheduledCamps = state.camps.filter(c => c.scheduledTime !== null && c.stage !== 'closed');
+      scheduledCamps.forEach((c1, i) => {
+        scheduledCamps.forEach((c2, j) => {
+          if (i !== j && c1.presenter === c2.presenter) {
+            const diffMs = Math.abs(new Date(c1.scheduledTime) - new Date(c2.scheduledTime));
+            if (diffMs < 90 * 60 * 1000) { // Overlap
+              criticalList.push(`🚨 *[Schedule Conflict]* *${c1.presenter.split(' ')[0]}* is double-booked between *${c1.agency}* and *${c2.agency}* on Gcal! <span onclick="window.switchTab('sessions');" style="cursor:pointer; text-decoration:underline; color:var(--primary-cyan); font-weight:700;">[Resolve Conflict 📅]</span>`);
+            }
+          }
+        });
+      });
+
+      // 3. Scan for MS Teams Missing link locks
+      state.camps.forEach(c => {
+        if (c.platform === 'Teams' && c.stage === 'post-camp' && !c.teamsRecordingUrl) {
+          criticalList.push(`🔒 *[Teams Locked]* *${c.agency}* package dispatch blocked due to missing Teams Recording Link. <span onclick="window.switchTab('pipeline');" style="cursor:pointer; text-decoration:underline; color:var(--primary-cyan); font-weight:700;">[Add Teams URL 🔗]</span>`);
+        }
+      });
+
+      if (criticalList.length > 0) {
+        const uniqueCritical = Array.from(new Set(criticalList));
+        replyText = `🎯 *GPEG-Bot Critical Action Panel*:\nI have scanned active pipelines and discovered *${uniqueCritical.length} high-priority bottlenecks* needing attention:\n\n` + uniqueCritical.join('\n\n');
+      } else {
+        replyText = `🎯 *GPEG-Bot Status*: Zero critical bottlenecks detected! All pipeline SLAs, Gcal bookings, and MS Teams linkages are compliant and operating smoothly.`;
+      }
     } else if (q.includes('active')) {
       const activeCount = state.camps.filter(c => c.stage !== 'closed').length;
       replyText = `@GPEG-Bot Report: There are currently *${activeCount} active camp engagements* inside the pipeline.`;
@@ -4225,18 +4265,46 @@ window.renderChatBotHistory = function() {
   if (!history) return;
   history.innerHTML = '';
 
-  state.chatBotMessages.forEach(msg => {
+  state.chatBotMessages.forEach((msg, idx) => {
     const isUser = msg.sender === 'user';
     const bubbleClass = isUser ? 'chatbot-msg-user' : 'chatbot-msg-bot';
+    
+    let feedbackHtml = '';
+    if (!isUser) {
+      feedbackHtml = `
+        <div class="chatbot-msg-feedback" style="font-size: 0.65rem; display: flex; justify-content: flex-end; gap: 0.4rem; color: var(--text-secondary); margin-top: 0.15rem; padding-right: 0.35rem; letter-spacing: 0.2px;">
+          <span>Was this helpful?</span>
+          <span onclick="window.captureBotFeedback(${idx}, 'HELPFUL')" style="cursor:pointer; color: var(--success-green); font-weight:700; text-decoration:underline;" title="Yes, helpful! 👍">👍 Yes</span>
+          <span onclick="window.captureBotFeedback(${idx}, 'UNHELPFUL')" style="cursor:pointer; color: var(--danger-red); font-weight:700; text-decoration:underline;" title="No, unhelpful 👎">👎 No</span>
+          ${msg.feedback ? `<span style="color: var(--primary-cyan); font-weight:800;">(${msg.feedback})</span>` : ''}
+        </div>
+      `;
+    }
+
     history.insertAdjacentHTML('beforeend', `
-      <div class="chatbot-msg-bubble ${bubbleClass}" style="white-space: pre-line;">
-        ${msg.text}
+      <div style="display: flex; flex-direction: column; align-items: ${isUser ? 'flex-end' : 'flex-start'}; margin-bottom: 0.55rem;">
+        <div class="chatbot-msg-bubble ${bubbleClass}" style="white-space: pre-line; max-width: 85%;">
+          ${msg.text}
+        </div>
+        ${feedbackHtml}
       </div>
     `);
   });
 
   // Auto-scroll to bottom
   history.scrollTop = history.scrollHeight;
+};
+
+window.captureBotFeedback = function(msgIdx, sentiment) {
+  const msg = state.chatBotMessages[msgIdx];
+  if (!msg || msg.feedback) return; // Prevent duplicate logging
+
+  msg.feedback = sentiment;
+  saveState();
+  window.renderChatBotHistory();
+
+  window.logAction('SUCCESS', `ChatBot Feedback: User rated response "${msg.text.substring(0, 35).replace(/[\r\n]+/g, ' ')}..." as ${sentiment}.`);
+  showToast('Feedback Logged', `Thank you! Rated bot reply as ${sentiment === 'HELPFUL' ? 'Helpful' : 'Not Helpful'}.`);
 };
 
 // 5. Buganizer / Issue Tracker Sync
