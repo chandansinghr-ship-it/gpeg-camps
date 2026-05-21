@@ -135,11 +135,11 @@
             <span class="rail-nav-label">Effort Hrs Details</span>
           </button>
 
-          <div class="rail-group-header">Developer Hub</div>
+          <div class="rail-group-header">⚙️ Admin & Engineering</div>
 
-          <button class="rail-nav-item" id="nav-automation" onclick="switchTab('automation')">
-            <span class="rail-nav-icon">🤖</span>
-            <span class="rail-nav-label">Automation Hub</span>
+          <button class="rail-nav-item" id="nav-admin-hub" onclick="switchTab('admin-hub')">
+            <span class="rail-nav-icon">⚙️</span>
+            <span class="rail-nav-label">Developer & Admin Hub</span>
           </button>
 
           <button class="rail-nav-item" id="nav-feedback" onclick="switchTab('feedback')">
@@ -410,15 +410,40 @@
               </div>
             </div>
 
-            <!-- Master Task List Board -->
+            <!-- Master Task List Board: Unified Operational Command Center Tabbed Widget (DA-06) -->
             <div class="chart-container-box" style="padding: 1.5rem; flex: 1; display:flex; flex-direction:column;">
               <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; margin-bottom: 1rem;">
-                <h3 style="color: var(--text-primary); font-size: 0.92rem; margin:0;">📋 Daily Deliverables Checklist</h3>
+                <h3 style="color: var(--text-primary); font-size: 0.92rem; margin:0;" id="action-hub-title-label">📋 Operational Command Center</h3>
                 <span style="font-size: 0.72rem; color: var(--text-muted);" id="daily-hub-pending-counter">3 pending actions</span>
               </div>
 
-              <div id="daily-hub-task-list-container" style="display:flex; flex-direction:column; gap:0.75rem; max-height:450px; overflow-y:auto; padding-right:0.25rem;">
-                <!-- Dynamic task cards render here -->
+              <!-- Dynamic widget tabs -->
+              <div class="db-tabs" style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.25rem; gap: 0.5rem; display: flex;">
+                <button class="db-tab-btn active" id="action-tab-btn-checklist" onclick="window.switchActionHubTab('checklist')" style="font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer;">📋 Daily Checklist</button>
+                <button class="db-tab-btn" id="action-tab-btn-sla" onclick="window.switchActionHubTab('sla')" style="font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer;">⏱️ Priority SLA Alerts</button>
+                <button class="db-tab-btn" id="action-tab-btn-all" onclick="window.switchActionHubTab('all')" style="font-size: 0.72rem; padding: 0.3rem 0.6rem; border-radius: 4px; cursor: pointer;">⚙️ Unified Task Center</button>
+              </div>
+
+              <!-- Content Panes -->
+              <!-- Pane A: Daily checklist -->
+              <div class="db-tab-content active" id="action-pane-checklist" style="display: block;">
+                <div id="daily-hub-task-list-container" style="display:flex; flex-direction:column; gap:0.75rem; max-height:450px; overflow-y:auto; padding-right:0.25rem;">
+                  <!-- checklist task cards inject here -->
+                </div>
+              </div>
+
+              <!-- Pane B: Priority SLA Alerts -->
+              <div class="db-tab-content" id="action-pane-sla" style="display: none;">
+                <div id="daily-hub-sla-list-container" style="display:flex; flex-direction:column; gap:0.75rem; max-height:450px; overflow-y:auto; padding-right:0.25rem;">
+                  <!-- SLA warnings inject dynamically -->
+                </div>
+              </div>
+
+              <!-- Pane C: Unified Task Center -->
+              <div class="db-tab-content" id="action-pane-all" style="display: none;">
+                <div id="daily-hub-all-tasks-container" style="display:flex; flex-direction:column; gap:0.75rem; max-height:450px; overflow-y:auto; padding-right:0.25rem;">
+                  <!-- Unified project tasks inject dynamically -->
+                </div>
               </div>
             </div>
 
@@ -867,6 +892,51 @@
         </div>
       </div>
     </div>
+
+    <!-- SECTION 9⚙️: GPEG TECHNICAL & DEVELOPER HUB (DA-01 & DA-03) -->
+    <div id="view-admin-hub" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+          <h2>⚙️ GPEG Technical & Developer Hub</h2>
+          <p>Administrative Control Console: Access Relational SQL Engines, system automation telemetry APIs, outbound email gateways, and production SSO auth bypass logs.</p>
+        </div>
+
+        <!-- Progressive Disclosure Stack (DA-03) -->
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+          
+          <!-- Spanner DDL & SQL Engine (Relocated from main dashboard - DA-01) -->
+          <div class="chart-container-box" style="padding: 1.5rem; border-color: var(--primary-cyan); background: rgba(0,233,255,0.005);">
+            <h3 style="color: var(--primary-cyan); font-size: 1rem; margin-top: 0; margin-bottom: 0.5rem; font-weight:800;">💾 Cloud Spanner Production relational schemas</h3>
+            <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 1rem;">Decoupled Database engine: Authoritative Spanner tables DDL, optimized UNION ALL query builders, and recording purge retention SQL crons.</p>
+            <div id="spanner-ddl-holder-admin">
+              <!-- Decoupled Spanner DDL inject here dynamically -->
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem;">
+            <!-- Google Calendar & Outbound Gateway summaries -->
+            <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.01);">
+              <h3 style="color: var(--warning-amber); font-size: 0.9rem; margin: 0 0 0.5rem 0;">📡 Calendar & Slides API Compilers</h3>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.5rem;">Verify platform schedule checks, slide template compiler statuses, and GDPR PII telemetry scrubbing engines E2E.</p>
+              <button class="btn btn-primary-sm" onclick="window.switchTab('automation')" style="width: 100%; font-size:0.7rem; padding:0.35rem; font-weight:800; border-radius:6px;">🔌 Launch API Automation Sandbox</button>
+            </div>
+
+            <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.01);">
+              <h3 style="color: var(--success-green); font-size: 0.9rem; margin: 0 0 0.5rem 0;">✉️ Centralized Email logs</h3>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.5rem;">Monitor outbox queues, inspect welcome templates parsing, and audit resolved Q&A CC email broadcasts.</p>
+              <button class="btn btn-primary-sm" onclick="window.switchTab('mail')" style="width: 100%; font-size:0.7rem; padding:0.35rem; font-weight:800; border-radius:6px; background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.15); color:var(--success-green);">✉️ Launch Inbound Outbox Gate</button>
+            </div>
+
+            <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.01);">
+              <h3 style="color: var(--danger-red); font-size: 0.9rem; margin: 0 0 0.5rem 0;">🔐 Security Activity Audits</h3>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 0.5rem;">Inspect real-time security logs, track SSO credential checks, and verify data-retention recordings deletions.</p>
+              <button class="btn btn-primary-sm" onclick="window.switchTab('activity')" style="width: 100%; font-size:0.7rem; padding:0.35rem; font-weight:800; border-radius:6px; background:rgba(248,113,113,0.08); border-color:rgba(248,113,113,0.15); color:var(--danger-red);">🔐 Launch Security Logs Monitor</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
     <!-- SECTION 1.9: UI/UX FEEDBACK & SURVEY POLL CONSOLE -->
     <div id="view-feedback" class="view-section">
       <div class="sandbox-panel">
@@ -1075,7 +1145,7 @@
           <div class="chart-container-box" style="padding: 1.25rem; background: rgba(66, 133, 244, 0.01);">
             <h3>Bandwidth Insights</h3>
             <ul style="font-size: 0.78rem; line-height: 1.5; margin-left: 1.15rem; margin-top: 0.5rem; color: var(--g-text-secondary);">
-              <li>Total Team capacity average is at <strong>85.6% (Optimal)</strong>.</li>
+              <li>Total Team capacity average is at <strong>85.8% (Optimal)</strong>.</li>
               <li>Alex is currently <strong>overutilized</strong> due to high PMax campaign volume. Recommend balancing incoming pre-camp tasks to Jordan.</li>
             </ul>
             <div style="margin-top: 1rem; border-top: 1px dashed var(--border-light); padding-top: 0.75rem;">
@@ -2174,7 +2244,11 @@
   discovery_status <span class="sql-type">STRING</span>(32) <span class="sql-keyword">DEFAULT</span> ("Not Sent"),
   presenter_assigned <span class="sql-type">STRING</span>(128),
   bfm_uplift <span class="sql-type">FLOAT64</span>,
-  feedback_score <span class="sql-type">FLOAT64</span>
+  feedback_score <span class="sql-type">FLOAT64</span>,
+  recording_url <span class="sql-type">STRING</span>(MAX),
+  recording_deleted_flag <span class="sql-type">BOOL</span> <span class="sql-keyword">DEFAULT</span> (false),
+  closed_timestamp <span class="sql-type">TIMESTAMP</span>,
+  recording_archived_flag <span class="sql-type">BOOL</span> <span class="sql-keyword">DEFAULT</span> (false)
 ) <span class="sql-keyword">PRIMARY KEY</span> (case_id);
 
 <span class="sql-comment">-- Table: operational SLA countdown tracker</span>

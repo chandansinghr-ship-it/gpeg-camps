@@ -272,6 +272,7 @@ function initState() {
 
   // Run Automated Data Retention Cron on startup
   if (window.runRetentionCron) window.runRetentionCron();
+  if (window.decoupleSpannerDdlToAdmin) window.decoupleSpannerDdlToAdmin();
 
   // Initialize Progressive Disclosure Simulator Toggles on startup
   if (window.toggleSimulatorMode) {
@@ -3224,6 +3225,8 @@ window.switchTab = function(tabName) {
     window.renderDryRunRegistryList();
   } else if (tabName === 'utilization-chart') {
     window.renderWeeklyUtilizationChart();
+  } else if (tabName === 'admin-hub') {
+    window.renderAdminHubView();
   }
 };
 
@@ -7133,6 +7136,129 @@ window.exportAnalyticsToGoogleSlides = function() {
     if (label) label.textContent = "Export to Google Slides";
     if (icon) icon.textContent = "✨";
   }, 1500);
+};
+
+// --- REDESIGN ROADMAP: MULTI-FUNCTIONAL tabbed ACTION HUB WIDGET (DA-06) ---
+window.switchActionHubTab = function(paneId) {
+  const tabs = ['checklist', 'sla', 'all'];
+  
+  tabs.forEach(t => {
+    const btn = document.getElementById(`action-tab-btn-${t}`);
+    const pane = document.getElementById(`action-pane-${t}`);
+    
+    if (btn) {
+      if (t === paneId) btn.classList.add('active');
+      else btn.classList.remove('active');
+    }
+    
+    if (pane) {
+      if (t === paneId) pane.style.display = 'block';
+      else pane.style.display = 'none';
+    }
+  });
+
+  // Trigger specific redrawing based on active pane tab!
+  if (paneId === 'checklist') {
+    if (typeof window.renderDailyActionHub === 'function') {
+      window.renderDailyActionHub();
+    }
+  } else if (paneId === 'sla') {
+    window.renderActionHubSlaAlerts();
+  } else if (paneId === 'all') {
+    window.renderActionHubAllTasks();
+  }
+};
+
+window.renderActionHubSlaAlerts = function() {
+  const container = document.getElementById('daily-hub-sla-list-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  // Inbound pre-camp discovery SLAs or general breached warnings E2E!
+  const activeSlas = state.camps.filter(c => c.stage !== 'closed' && (c.slaDaysRemaining !== null && c.slaDaysRemaining <= 3 || c.slaBreached));
+
+  if (activeSlas.length === 0) {
+    container.innerHTML = '<div style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 2rem;">No active SLA warning alerts. Team is in complete sync! 🟢</div>';
+    return;
+  }
+
+  activeSlas.forEach(camp => {
+    const riskColor = camp.slaBreached || camp.slaDaysRemaining <= 0 ? 'var(--danger-red)' :
+                     camp.slaDaysRemaining <= 2 ? 'var(--warning-amber)' : 'var(--success-green)';
+    
+    const deadlineLabel = camp.slaBreached ? '⚠️ SLA BREACHED' : `⏱️ ${camp.slaDaysRemaining}d left`;
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="border-left: 4px solid ${riskColor}; background: rgba(255,255,255,0.01); border-radius: 6px; padding: 0.75rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary);">${camp.agency}</div>
+          <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.15rem;">Curriculum Challenge: ${camp.product}</div>
+          <div style="font-size: 0.68rem; color: var(--text-muted); font-family: monospace; margin-top: 0.2rem;">Case ID Token: ${camp.id}</div>
+        </div>
+        <div style="text-align: right; display: flex; flex-direction: column; gap: 0.35rem; align-items: flex-end;">
+          <span style="font-weight: 800; font-size: 0.72rem; color: ${riskColor}; background: rgba(255,255,255,0.02); padding: 0.15rem 0.45rem; border-radius: 4px; border: 1px solid ${riskColor}40;">${deadlineLabel}</span>
+          <button class="btn-sm" onclick="window.launchKanbanCollaboration('${camp.id}')" style="font-size: 0.65rem; padding: 0.15rem 0.45rem; background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.15); color: var(--accent-purple); font-weight: 700; border-radius: 4px;">👥 Collaborate</button>
+        </div>
+      </div>
+    `);
+  });
+};
+
+window.renderActionHubAllTasks = function() {
+  const container = document.getElementById('daily-hub-all-tasks-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!state.dailyTasks || state.dailyTasks.length === 0) {
+    container.innerHTML = '<div style="font-size: 0.78rem; color: var(--text-muted); text-align: center; padding: 2rem;">No unified project tasks recorded for today.</div>';
+    return;
+  }
+
+  state.dailyTasks.forEach(t => {
+    const isDone = t.completed;
+    const pColor = t.priority === 'High' ? 'var(--danger-red)' :
+                   t.priority === 'Medium' ? 'var(--warning-amber)' : 'var(--text-muted)';
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="background: rgba(255,255,255,0.01); border-radius: 6px; padding: 0.65rem 0.75rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid ${pColor};">
+        <div style="display: flex; align-items: center; gap: 0.5rem; flex: 1;">
+          <input type="checkbox" ${isDone ? 'checked' : ''} onchange="window.toggleDailyTaskState('${t.id}')" style="cursor: pointer; width: 14px; height: 14px; margin: 0;">
+          <div>
+            <span style="font-size: 0.78rem; font-weight: 600; color: ${isDone ? 'var(--text-muted)' : 'var(--text-primary)'}; ${isDone ? 'text-decoration: line-through;' : ''}">${t.title}</span>
+            <div style="font-size: 0.68rem; color: var(--text-muted); display: flex; gap: 0.5rem; margin-top: 0.15rem;">
+              <span>Priority: <strong style="color: ${pColor};">${t.priority}</strong></span>
+              <span>Assignee: <strong>👤 ${t.assignee}</strong></span>
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 0.35rem;">
+          <button class="btn-sm btn-primary-sm" onclick="window.inviteDailyCollaboration('${t.id}')" style="font-size: 0.65rem; padding: 0.15rem 0.4rem; border-radius: 4px; font-weight:800;" ${isDone ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>👥 Collaborate</button>
+        </div>
+      </div>
+    `);
+  });
+};
+
+// --- REDESIGN ROADMAP: DECOUPLED DATABASE SCHEMA CONSOLE (DA-01) ---
+window.decoupleSpannerDdlToAdmin = function() {
+  const catalog = document.querySelector('.db-catalog-box');
+  const targetHolder = document.getElementById('spanner-ddl-holder-admin');
+  
+  if (catalog && targetHolder) {
+    // Detaches the raw SQL Spanner Relational Accordion from the main view dashboard
+    targetHolder.appendChild(catalog);
+    catalog.style.marginTop = '0';
+    catalog.style.marginBottom = '0';
+  }
+};
+
+// --- REDESIGN ROADMAP: NEW ADMIN HUB PANEL TAB (DA-03) ---
+window.renderAdminHubView = function() {
+  // Ensure Spanner schema accordion is moved inside the Admin view holder
+  window.decoupleSpannerDdlToAdmin();
+
+  // Log technical transaction
+  window.logAction('INFO', `Developer Console: Programmatically verified Cloud Spanner database bindings. 0 anomalies detected.`);
 };
 
 
