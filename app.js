@@ -5942,7 +5942,7 @@ window.runGcsDatabaseBackup = async function() {
     window.logAction('SUCCESS', `Cloud Spanner Export (Offline Fallback): Decoupled Spanner transaction history successfully archived under Zero-Trust IAP credentials.`);
   } finally {
     btn.disabled = false;
-    btn.textContent = "Backup Spanner State to gs://gpeg-spanner/";
+    btn.textContent = "Archive All Active Records to Cloud Storage";
   }
 };
 
