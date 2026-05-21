@@ -2235,20 +2235,35 @@
               </p>
               <div class="sql-code-block"><span class="sql-comment">-- Table: primary camp workflow state tracking</span>
 <span class="sql-keyword">CREATE TABLE</span> gpeg_camp_cases (
-  case_id <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,
+  requested_date <span class="sql-type">TIMESTAMP</span>,
   agency_name <span class="sql-type">STRING</span>(256) <span class="sql-keyword">NOT NULL</span>,
-  region_scope <span class="sql-type">STRING</span>(32) <span class="sql-keyword">NOT NULL</span>, <span class="sql-comment">-- EMEA, APAC, AMER</span>
-  product_area <span class="sql-type">STRING</span>(256) <span class="sql-keyword">NOT NULL</span>,
-  current_stage <span class="sql-type">INT64</span> <span class="sql-keyword">NOT NULL</span>, <span class="sql-comment">-- 1-Nomination, 2-Pre-Camp, 3-Execution, 4-Post-Camp, 5-Closed</span>
-  deck_type <span class="sql-type">STRING</span>(64) <span class="sql-keyword">DEFAULT</span> ("Standard Deck"),
-  discovery_status <span class="sql-type">STRING</span>(32) <span class="sql-keyword">DEFAULT</span> ("Not Sent"),
-  presenter_assigned <span class="sql-type">STRING</span>(128),
-  bfm_uplift <span class="sql-type">FLOAT64</span>,
-  feedback_score <span class="sql-type">FLOAT64</span>,
-  recording_url <span class="sql-type">STRING</span>(MAX),
-  recording_deleted_flag <span class="sql-type">BOOL</span> <span class="sql-keyword">DEFAULT</span> (false),
-  closed_timestamp <span class="sql-type">TIMESTAMP</span>,
-  recording_archived_flag <span class="sql-type">BOOL</span> <span class="sql-keyword">DEFAULT</span> (false)
+  case_id <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>, -- PRIMARY KEY
+  region <span class="sql-type">STRING</span>(32) <span class="sql-keyword">NOT NULL</span>,
+  country <span class="sql-type">STRING</span>(32),
+  camp_type <span class="sql-type">STRING</span>(128),
+  mos_topic <span class="sql-type">STRING</span>(256),
+  product_category <span class="sql-type">STRING</span>(256),
+  planned_date <span class="sql-type">TIMESTAMP</span>,
+  timeslot <span class="sql-type">STRING</span>(64),
+  ist_timeslot <span class="sql-type">STRING</span>(64),
+  content_deck <span class="sql-type">STRING</span>(128),
+  session_title <span class="sql-type">STRING</span>(256),
+  calendar_invite_link <span class="sql-type">STRING</span>(MAX),
+  google_meet_link <span class="sql-type">STRING</span>(MAX),
+  status <span class="sql-type">STRING</span>(64),
+  requester_ldap <span class="sql-type">STRING</span>(128),
+  target_audience <span class="sql-type">STRING</span>(256),
+  duration <span class="sql-type">INT64</span>,
+  gpeg_poc_1 <span class="sql-type">STRING</span>(128),
+  gpeg_poc_2 <span class="sql-type">STRING</span>(128),
+  gpeg_poc_3 <span class="sql-type">STRING</span>(128),
+  pre_camp_survey_link <span class="sql-type">STRING</span>(MAX),
+  post_feedback_survey_link <span class="sql-type">STRING</span>(MAX),
+  session_recording <span class="sql-type">STRING</span>(MAX),
+  session_transcripts <span class="sql-type">STRING</span>(MAX),
+  pdf_format_of_deck <span class="sql-type">STRING</span>(MAX),
+  impact_report <span class="sql-type">STRING</span>(MAX),
+  comment <span class="sql-type">STRING</span>(MAX)
 ) <span class="sql-keyword">PRIMARY KEY</span> (case_id);
 
 <span class="sql-comment">-- Table: operational SLA countdown tracker</span>
