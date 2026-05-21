@@ -2427,6 +2427,53 @@
                 </div>
               </div>
 
+              <!-- 📅 Interactive dry run scheduling console -->
+              <div style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-light); padding: 1rem; border-radius: 8px; margin-bottom: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem;" id="dry-run-scheduler-form">
+                <div style="font-size: 0.78rem; font-weight: 700; color: var(--primary-cyan); display: flex; align-items: center; gap: 0.25rem;">
+                  <span>📅 Dry Run Calendar & Invitation Scheduler</span>
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; align-items: flex-end;">
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dry-sched-presenter" style="font-size: 0.68rem; font-weight: 700;">Presenter Associate</label>
+                    <select id="dry-sched-presenter" class="form-control" style="height: 28px; font-size: 0.72rem; padding: 0.2rem;">
+                      <option value="Taylor Chen">Taylor Chen</option>
+                      <option value="Alex Rivera">Alex Rivera</option>
+                      <option value="Jordan Blake">Jordan Blake</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dry-sched-product" style="font-size: 0.68rem; font-weight: 700;">Ads Product / Topic</label>
+                    <select id="dry-sched-product" class="form-control" style="height: 28px; font-size: 0.72rem; padding: 0.2rem;">
+                      <option value="GMP DV360 Advanced">GMP DV360 Advanced</option>
+                      <option value="Search & PMax Bidding">Search & PMax Bidding</option>
+                      <option value="GMP CM360 Foundations">GMP CM360 Foundations</option>
+                      <option value="Partnership Ads MFG">Partnership Ads MFG</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dry-sched-date" style="font-size: 0.68rem; font-weight: 700;">Scheduled Date & Time</label>
+                    <input type="datetime-local" id="dry-sched-date" class="form-control" style="height: 28px; font-size: 0.72rem; padding: 0.2rem;" value="2026-05-25T10:00">
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dry-sched-lead" style="font-size: 0.68rem; font-weight: 700;">Designated POD Lead</label>
+                    <select id="dry-sched-lead" class="form-control" style="height: 28px; font-size: 0.72rem; padding: 0.2rem;">
+                      <option value="Taylor Chen">Taylor Chen</option>
+                      <option value="Alex Rivera" selected>Alex Rivera</option>
+                      <option value="Jordan Blake">Jordan Blake</option>
+                    </select>
+                  </div>
+                  <div class="form-group" style="margin-bottom: 0;">
+                    <label for="dry-sched-priority" style="font-size: 0.68rem; font-weight: 700;">Priority</label>
+                    <select id="dry-sched-priority" class="form-control" style="height: 28px; font-size: 0.72rem; padding: 0.2rem;">
+                      <option value="High">🔴 High</option>
+                      <option value="Medium" selected>🟡 Medium</option>
+                      <option value="Low">🔵 Low</option>
+                    </select>
+                  </div>
+                  <button class="btn btn-primary-sm" onclick="window.submitDryRunScheduler()" style="font-size: 0.72rem; font-weight: 800; height: 28px; border-radius: 4px; padding: 0.3rem 0.6rem;">Schedule Dry Run 🚀</button>
+                </div>
+              </div>
+
               <!-- Nominations Table -->
               <div style="overflow-x: auto;">
                 <table class="outbox-table" style="width: 100%; font-size: 0.78rem; border-collapse: collapse;">

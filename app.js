@@ -6785,5 +6785,58 @@ window.approveDryRunCertification = function(dryRunId) {
   window.renderDryRunRegistryList();
 };
 
+window.submitDryRunScheduler = function() {
+  const presenter = document.getElementById('dry-sched-presenter').value;
+  const product = document.getElementById('dry-sched-product').value;
+  const datetime = document.getElementById('dry-sched-date').value;
+  const lead = document.getElementById('dry-sched-lead').value;
+  const priority = document.getElementById('dry-sched-priority').value;
+
+  if (!datetime) {
+    alert("Please choose a valid Date & Time for the Dry Run invite!");
+    return;
+  }
+
+  // 1. Generate Gmeet link
+  const meetLink = `https://meet.google.com/dry-run-${Math.random().toString(36).substring(2,12)}`;
+
+  // 2. Log Calendar Invite in System Audit Ledgers
+  window.logAction('SUCCESS', `Google Calendar API: Programmatically scheduled dry-run certification invite for presenter [${presenter}] on ${product}. Meeting Link: [${meetLink}].`);
+
+  // 3. Draft and send outbox invitational email to the audience
+  const formattedTime = datetime.replace('T', ' ');
+  const mockInviteMail = {
+    id: `dry-inv-${Math.floor(Math.random() * 90000) + 10000}`,
+    timestamp: new Date().toISOString(),
+    from: "gpeg-camps-upskilling@google.com",
+    to: `${presenter.toLowerCase().replace(' ', '.')}@google.com`,
+    cc: `demo-lead@google.com, demo-manager@google.com, ${lead.toLowerCase().replace(' ', '.')}@google.com`,
+    bcc: "",
+    subject: `INVITATION: Dry Run Certification for ${presenter} | ${product}`,
+    body: `Hi ${presenter},\n\nYou have been nominated and scheduled for a Dry Run Certification session to assess campaign readiness in Google Ads Product Area: ${product}.\n\n📅 Meeting Date/Time: ${formattedTime}\n🎓 Designated POD Lead Evaluator: ${lead}\n\n📹 Dynamic Google Meet Link: ${meetLink}\n\nAudiences / Stakeholders CC-d in loop: demo-lead@google.com, demo-manager@google.com.\n\nBest,\nGPEG Training & Enablement Operations`
+  };
+
+  // Push to outbox
+  state.outbox.unshift(mockInviteMail);
+  localStorage.setItem('gpeg_outbox', JSON.stringify(state.outbox));
+
+  // 4. Append to Table Registry
+  const newDryRun = {
+    id: `dry_${Math.floor(Math.random() * 9000) + 1000}`,
+    name: presenter,
+    product: product,
+    deadline: datetime.split('T')[0],
+    priority: priority,
+    lead: lead,
+    status: "Pending Dry Run"
+  };
+  state.dryRuns.unshift(newDryRun);
+  localStorage.setItem('gpeg_dry_runs', JSON.stringify(state.dryRuns));
+
+  // Trigger render updates
+  showToast('Dry Run Scheduled 📅', `Calendar invite and outbox emails successfully dispatched!`);
+  window.renderDryRunRegistryList();
+};
+
 
 
