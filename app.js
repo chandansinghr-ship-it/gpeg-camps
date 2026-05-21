@@ -2303,9 +2303,17 @@ window.changeActiveRole = async function(role) {
   else if (role === 'Stakeholder') ldap = 'stakeholder.lead';
   else if (role === 'Organizer') ldap = 'organizer.camps';
 
+  // Defensive Lock: Save selected role in local state and storage as the very first action!
+  state.activeRole = role;
+  localStorage.setItem('gpeg_role', role);
+
   const success = await performBackendLogin(ldap, role);
   if (success) {
-    await syncWithServer();
+    try {
+      await syncWithServer();
+    } catch (err) {
+      console.warn('Failed to sync with server during role switch, running offline:', err);
+    }
   }
   
   window.logAction('WARNING', `Active persona switched to: [${role}] (SSO Authenticated)`);
@@ -2321,6 +2329,12 @@ window.changeActiveRole = async function(role) {
   showToast('Role Workspace Active 👤', roleWelcomes[role] || `Logged in successfully as ${role}.`);
   
   window.applyRoleAccessControl();
+
+  // Defensive UI Lock: Guarantee dropdown select element displays the selected role value visually
+  const roleSwitcher = document.getElementById('role-switcher');
+  if (roleSwitcher) {
+    roleSwitcher.value = role;
+  }
   
   // Default Operational landing tabs to prevent metrics overwhelm!
   if (role === 'Presenter' || role === 'AM' || role === 'Organizer') {
