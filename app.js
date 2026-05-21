@@ -219,7 +219,7 @@ function initState() {
   }
 
   const savedAuthCaseId = localStorage.getItem('gpeg_auth_case_id');
-  if (savedAuthCaseId) {
+  if (savedAuthCaseId && savedAuthCaseId !== 'null' && savedAuthCaseId !== 'undefined') {
     state.authenticatedAgencyCaseId = savedAuthCaseId;
   } else {
     state.authenticatedAgencyCaseId = null;
@@ -780,24 +780,30 @@ function getStageBadgeColor(status) {
 }
 
 function getActionButton(camp) {
+  let actionBtn = '';
   if (camp.stage === 'nomination') {
-    return `<button class="btn-sm btn-primary-sm" onclick="openKickoffModal('${camp.id}')">Kickoff Camp</button>`;
+    actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openKickoffModal('${camp.id}')">Kickoff Camp</button>`;
   } else if (camp.stage === 'pre-camp') {
     const disabled = camp.discoveryStatus === 'Pending' ? 'disabled title="Awaiting client discovery form submission"' : '';
     const label = camp.discoveryStatus === 'Submitted' ? 'Start Workshop' : 'Awaiting Discovery';
     const btnClass = camp.discoveryStatus === 'Submitted' ? 'btn-primary-sm' : '';
-    return `<button class="btn-sm ${btnClass}" ${disabled} onclick="startLiveSessionPrompt('${camp.id}')">${label}</button>`;
+    actionBtn = `<button class="btn-sm ${btnClass}" ${disabled} onclick="startLiveSessionPrompt('${camp.id}')">${label}</button>`;
   } else if (camp.stage === 'in-camp') {
-    return `<button class="btn-sm btn-primary-sm" onclick="openLiveSessionModal('${camp.id}')">Presenter Console</button>`;
+    actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openLiveSessionModal('${camp.id}')">Presenter Console</button>`;
   } else if (camp.stage === 'post-camp') {
     const pendingQuestions = camp.liveQuestions.some(q => !q.answered);
     const disabled = pendingQuestions ? 'disabled title="Must resolve all escalated PM questions first"' : '';
     const label = pendingQuestions ? 'Q&A Resolving...' : 'Draft Follow-up';
     const btnClass = pendingQuestions ? '' : 'btn-primary-sm';
-    return `<button class="btn-sm ${btnClass}" ${disabled} onclick="openFollowUpModal('${camp.id}')">${label}</button>`;
+    actionBtn = `<button class="btn-sm ${btnClass}" ${disabled} onclick="openFollowUpModal('${camp.id}')">${label}</button>`;
   } else {
     return `<span style="font-size: 0.75rem; color: var(--success-green); font-weight: 600;">Completed ✅</span>`;
   }
+
+  // Render dynamic Collaborate quick-launch button right next to the main pipeline action E2E!
+  const colBtn = `<button class="btn-sm" onclick="window.launchKanbanCollaboration('${camp.id}')" style="max-width:90px; margin-left: 0.35rem; font-size: 0.68rem; padding: 0.25rem; background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.15); color: var(--accent-purple); font-weight: 700;">👥 Collaborate</button>`;
+  
+  return `<div style="display: flex; align-items: center; gap: 0.25rem; width: 100%;">${actionBtn}${colBtn}</div>`;
 }
 
 function renderSidebarSlaList() {
@@ -1211,15 +1217,15 @@ window.submitAgencyFeedback = function(caseId) {
 };
 
 // --- SANDBOX 3: PM & GPL ESCALATION QUEUE ---
-function renderPmQueue() {
+window.renderPmQueue = function() {
   const container = document.getElementById('pm-queue-list');
   container.innerHTML = '';
 
   // 1. Filter live escalated questions that are unresolved
   const campsWithUnresolved = state.camps.filter(c => c.liveQuestions.some(q => !q.answered));
 
-  // 2. Filter persistent buganizer tickets that are unresolved (New status)
-  const pendingBuganizerTickets = (state.buganizerTickets || []).filter(t => t.status === 'New');
+  // 2. Filter persistent buganizer tickets that are unresolved (New or Open status without answer)
+  const pendingBuganizerTickets = (state.buganizerTickets || []).filter(t => (t.status === 'New' || t.status === 'Open') && !t.answer);
 
   if (campsWithUnresolved.length === 0 && pendingBuganizerTickets.length === 0) {
     container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.95rem; text-align: center; padding: 2rem;">No escalated technical questions pending PM review. Excellent job!</div>';
@@ -2911,8 +2917,16 @@ window.timeTravel = function(days) {
     
     // Restore SLA days inside camps state to seed values
     state.camps.forEach(c => {
-      if (c.id === '1-4893000041135') c.slaDaysRemaining = 3;
-      if (c.id === '4-9901000031200') c.slaDaysRemaining = 1;
+      if (c.id === '1-4893000041135') {
+        c.slaDaysRemaining = 3;
+        c.slaBreached = false;
+        c.status = 'Awaiting Discovery';
+      }
+      if (c.id === '4-9901000031200') {
+        c.slaDaysRemaining = 1;
+        c.slaBreached = false;
+        c.status = 'Resolving Queries & Follow-up';
+      }
     });
     saveState();
     renderDashboard();
@@ -2924,47 +2938,8 @@ window.timeTravel = function(days) {
   state.simulatedTime = current.toISOString();
   saveState();
 
-  // Loop active camps and decrement SLA days
-  state.camps.forEach(camp => {
-    if (camp.stage !== 'closed') {
-      if (camp.slaDaysRemaining !== null) {
-        camp.slaDaysRemaining = Math.max(0, camp.slaDaysRemaining - days);
-        if (camp.slaDaysRemaining === 0 && !camp.slaBreached) {
-          camp.slaBreached = true;
-          camp.deckType = 'Standard Deck'; // SLA breach auto reverts to default deck protocol!
-          camp.status = 'SLA Breached ⚠️';
-          
-          window.logAction('WARNING', `SLA Expiration: Case ${camp.id} Discovery SLA breached! Automatically reverted to Standard Default Deck Protocol.`);
-          showToast('SLA Breached!', `Case ${camp.id} has breached its discovery form SLA.`);
-          
-          // Generate automated SLA Breach notification email in Outbox
-          const breachMail = {
-            id: `m${Math.floor(Math.random() * 90000) + 10000}`,
-            timestamp: new Date(state.simulatedTime).toISOString(),
-            from: 'gpeg-camps@google.com',
-            to: camp.amEmail,
-            cc: 'gpeg-camps-leads@google.com',
-            bcc: '',
-            subject: `ALERT: Pre-Camp Customization Window Closed for ${camp.agency}`,
-            body: `Hi AM,\n\nThe Discovery Form submission deadline for Case #${camp.id} has passed. Under GPEG SLA protocols, we require a minimum of one/two weeks of lead time to custom compile deck materials.\n\nAs a result, Case #${camp.id} has been reverted to Standard Default Deck Protocol.\n\nBest,\nGPEG Camps Team`
-          };
-          
-          state.outbox.unshift(breachMail);
-          
-          if (typeof window === 'undefined' || !window.isTestRunnerEnv) {
-            fetch('/api/outbox', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'X-GPEG-Session': currentSessionToken
-              },
-              body: JSON.stringify(breachMail)
-            }).catch(err => console.error('Failed to push breach email to server:', err));
-          }
-        }
-      }
-    }
-  });
+  // Dynamically recalculate all SLA days and breaches based on advanced date
+  window.recalculateCampsSlaStatus();
 
   saveState();
   window.logAction('WARNING', `SLA Time Machine: Simulated clock skipped +${days} days. Current calendar is now ${current.toLocaleDateString()}.`);
@@ -3242,6 +3217,8 @@ window.switchTab = function(tabName) {
     window.renderDailyActionHub();
   } else if (tabName === 'rehearsal') {
     window.renderDryRunRegistryList();
+  } else if (tabName === 'utilization-chart') {
+    window.renderWeeklyUtilizationChart();
   }
 };
 
@@ -6042,6 +6019,9 @@ window.launchAiRehearsalSim = function() {
   // Display Workspace
   document.getElementById('rehearsal-workspace-box').style.display = 'block';
   document.getElementById('rehearsal-scorecard-panel').style.display = 'none';
+  if (document.getElementById('rehearsal-scorecard-placeholder')) {
+    document.getElementById('rehearsal-scorecard-placeholder').style.display = 'flex';
+  }
   
   document.getElementById('rehearsal-simulated-question-text').textContent = `"${question}"`;
   
@@ -6115,6 +6095,9 @@ window.evaluatePresenterRehearsal = function() {
   document.getElementById('rehearsal-score-delivery').style.color = delivery >= 80 ? 'var(--primary-cyan)' : 'var(--warning-amber)';
   
   document.getElementById('rehearsal-recommendation-text').textContent = `"${recommendation}"`;
+  if (document.getElementById('rehearsal-scorecard-placeholder')) {
+    document.getElementById('rehearsal-scorecard-placeholder').style.display = 'none';
+  }
   document.getElementById('rehearsal-scorecard-panel').style.display = 'block';
   
   // Log Attempt
@@ -6898,6 +6881,108 @@ window.submitDryRunScheduler = function() {
   // Trigger render updates
   showToast('Dry Run Scheduled 📅', `Calendar invite and outbox emails successfully dispatched!`);
   window.renderDryRunRegistryList();
+};
+
+window.renderWeeklyUtilizationChart = function() {
+  const container = document.getElementById('utilization-chart-bars-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const weekEndingStr = "2026-05-22";
+  const activeUtils = state.weeklyUtilization.filter(u => u.weekEnding === weekEndingStr);
+
+  if (activeUtils.length === 0) {
+    container.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding-top: 2rem;">No utilization data logged for this week.</div>';
+    return;
+  }
+
+  activeUtils.forEach(row => {
+    const ratio = Math.round((row.loggedHrs / row.expectedHrs) * 100);
+    const barColor = row.status === 'Overutilized' ? 'var(--g-red)' :
+                     row.status === 'Optimal' ? 'var(--g-green)' : 'var(--g-amber)';
+
+    container.insertAdjacentHTML('beforeend', `
+      <div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">
+          <span>${row.name}</span>
+          <span style="color: ${barColor};">${row.loggedHrs} hrs logged / ${row.expectedHrs} hrs expected (${ratio}%${row.status === 'Overutilized' ? ' - OVERUTILIZED' : ''})</span>
+        </div>
+        <div class="util-bar-container" style="background: rgba(255,255,255,0.05); height: 8px; border-radius: 4px; overflow: hidden;">
+          <div class="util-bar-fill" style="width: ${Math.min(100, ratio)}%; background: ${barColor} !important; height: 100%;"></div>
+        </div>
+      </div>
+    `);
+  });
+};
+
+window.recalculateCampsSlaStatus = function() {
+  const now = new Date(state.simulatedTime || "2026-05-18T14:34:38Z");
+
+  state.camps.forEach(camp => {
+    if (camp.stage === 'closed') return;
+
+    if (camp.stage === 'pre-camp' && camp.scheduledTime) {
+      const scheduled = new Date(camp.scheduledTime);
+      if (scheduled <= now) {
+        // Presenter scheduled time passed, but discovery is still pending or prep is incomplete!
+        camp.slaDaysRemaining = 0;
+        camp.slaBreached = true;
+        camp.status = 'SLA Breached ⚠️';
+        camp.deckType = 'Standard Deck'; // Revert customized deck
+      } else {
+        // Calculate remaining days until scheduled time
+        const diffMs = scheduled - now;
+        const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+        camp.slaDaysRemaining = diffDays;
+      }
+    } else if (camp.stage === 'post-camp' && camp.scheduledTime) {
+      // 48-hour follow-up SLA window
+      const scheduled = new Date(camp.scheduledTime);
+      const deadline = new Date(scheduled.getTime() + 48 * 60 * 60 * 1000); // 48 hours from session
+      
+      if (now > deadline) {
+        camp.slaDaysRemaining = 0;
+        camp.slaBreached = true;
+        camp.status = 'SLA Breached ⚠️';
+      } else {
+        const diffMs = deadline - now;
+        const diffDays = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+        camp.slaDaysRemaining = diffDays;
+      }
+    }
+  });
+  localStorage.setItem('gpeg_camps', JSON.stringify(state.camps));
+};
+
+window.launchKanbanCollaboration = function(campId) {
+  const camp = state.camps.find(c => c.id === campId);
+  if (!camp) return;
+
+  // Automatically inject a new daily task matching this camp if not present
+  const taskTitle = `Collaborative prep for ${camp.agency} (${camp.product})`;
+  let task = state.dailyTasks.find(t => t.title === taskTitle);
+
+  if (!task) {
+    task = {
+      id: `t_d_auto_${Math.floor(Math.random() * 9000) + 1000}`,
+      title: taskTitle,
+      priority: camp.slaDaysRemaining <= 3 ? "High" : "Medium",
+      source: "Kanban Pipeline Quick-Link",
+      assignee: camp.presenter || "Taylor Chen",
+      completed: false,
+      resources: []
+    };
+    state.dailyTasks.unshift(task);
+    localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+  }
+
+  // Switch to Daily Hub tab
+  window.switchTab('daily-hub');
+
+  // Trigger active collaboration request automatically!
+  setTimeout(() => {
+    window.inviteDailyCollaboration(task.id);
+  }, 250);
 };
 
 

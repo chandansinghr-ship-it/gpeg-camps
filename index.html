@@ -1067,37 +1067,8 @@
         <div class="sandbox-split" style="grid-template-columns: 2fr 1fr; gap: 1.5rem;">
           <div class="chart-container-box" style="padding: 1.5rem;">
             <h3>Practitioner Capacity Bandwidth (Weekly effort)</h3>
-            <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem;">
-              <!-- Taylor -->
-               <div>
-                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">
-                   <span>Taylor Chen (Lead Presenter)</span>
-                   <span style="color: var(--g-blue);">36 hrs logged / 40 hrs expected (90%)</span>
-                 </div>
-                 <div class="util-bar-container">
-                   <div class="util-bar-fill" style="width: 90%;"></div>
-                 </div>
-               </div>
-               <!-- Alex -->
-               <div>
-                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">
-                   <span>Alex Rivera (Presenter)</span>
-                   <span style="color: var(--g-red);">45 hrs logged / 40 hrs expected (112% - OVERUTILIZED)</span>
-                 </div>
-                 <div class="util-bar-container">
-                   <div class="util-bar-fill" style="width: 100%; background: var(--g-red) !important;"></div>
-                 </div>
-               </div>
-               <!-- Jordan -->
-               <div>
-                 <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.25rem;">
-                   <span>Jordan Blake (Presenter)</span>
-                   <span style="color: var(--g-amber);">22 hrs logged / 40 hrs expected (55%)</span>
-                 </div>
-                 <div class="util-bar-container">
-                   <div class="util-bar-fill" style="width: 55%; background: var(--g-amber) !important;"></div>
-                 </div>
-               </div>
+            <div style="display: flex; flex-direction: column; gap: 1.25rem; margin-top: 1rem;" id="utilization-chart-bars-container">
+              <!-- Dynamic capacity bars inject here -->
             </div>
           </div>
 
@@ -2370,6 +2341,13 @@
           <!-- Right: Performance Audit Feedbacks -->
           <div style="display: flex; flex-direction: column; gap: 1.25rem;">
             
+            <!-- AI Rehearsal Placeholder Empty State -->
+            <div class="chart-container-box" id="rehearsal-scorecard-placeholder" style="padding: 1.5rem; border-color: var(--border-light); background: rgba(255, 255, 255, 0.01); text-align: center; display: flex; flex-direction: column; gap: 0.75rem; justify-content: center; align-items: center; min-height: 200px;">
+              <span style="font-size: 2.5rem; filter: grayscale(0.3);">🎙️</span>
+              <h3 style="color: var(--text-primary); font-size: 0.9rem; margin: 0;">AI Evaluation Workspace</h3>
+              <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4; max-width: 280px; margin: 0;">Load a curriculum challenge on the left, type your speech pitch response, and click <strong>Evaluate Pitch</strong> to compile dynamic AI performance scoring E2E.</p>
+            </div>
+
             <!-- Rehearsal Scorecard -->
             <div class="chart-container-box" id="rehearsal-scorecard-panel" style="padding: 1.25rem; display: none; border-color: var(--success-green); background: rgba(16,185,129,0.01);">
               <h3 style="color: var(--success-green); font-size: 0.9rem; margin-top: 0; margin-bottom: 0.75rem;">Rehearsal Performance Evaluation</h3>
