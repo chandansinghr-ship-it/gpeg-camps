@@ -1356,17 +1356,8 @@
               <li>The database instantiates a new camp tracking record automatically.</li>
               <li>A notification triggers in the GPEG team chat.</li>
             </ul>
-            <div style="background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border-light); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.8rem; color: var(--primary-cyan);">
-              // Simulated webhook payload<br>
-              {<br>
-              &nbsp;&nbsp;"event": "ticket.created",<br>
-              &nbsp;&nbsp;"queue": "gpeg-camps",<br>
-              &nbsp;&nbsp;"caseId": "2-8492000045122",<br>
-              &nbsp;&nbsp;"agency": "Publicis Zenith",<br>
-              &nbsp;&nbsp;"nominator": "am.zenith@google.com",<br>
-              &nbsp;&nbsp;"product": "CM360"<br>
-              }
-            </div>
+            <div id="cases-webhook-response-console" style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-light); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--primary-cyan); white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto;">// Inbound Webhook JSON Response Console
+// Trigger "Submit Ticket" to receive raw API responses...</div>
           </div>
         </div>
       </div>
