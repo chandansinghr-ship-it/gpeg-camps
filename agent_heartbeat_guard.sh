@@ -2,7 +2,7 @@
 # GPEG Camps Agentic Infrastructure - Automated SRE Heartbeat Guard
 # Evaluates compilation and E2E tests dynamically on the infrastructure side prior to LLM turns.
 
-TEST_RUNNER="/usr/local/google/home/chandansinghr/.gemini/jetski/scratch/simulate_tests.py"
+TEST_RUNNER="/usr/local/google/home/chandansinghr/.gemini/jetski/scratch/camps-portal/simulate_tests.py"
 FAILURE_REPORT="/usr/local/google/home/chandansinghr/.gemini/jetski/scratch/camps-portal/.agent_brain/test_failure_report.json"
 mkdir -p "/usr/local/google/home/chandansinghr/.gemini/jetski/scratch/camps-portal/.agent_brain"
 
@@ -13,7 +13,14 @@ test_output=$(python3 "$TEST_RUNNER" 2>&1)
 exit_code=$?
 
 if [ $exit_code -eq 0 ]; then
-  echo "✓ SRE Heartbeat: All 23/23 test scenarios passed successfully! Infrastructure state is stable."
+  passed_msg=$(echo "$test_output" | grep -i "SUCCESS: All")
+  if [ -n "$passed_msg" ]; then
+    # Strip color formatting escape codes from parsed logs
+    passed_clean=$(echo "$passed_msg" | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g")
+    echo "✓ SRE Heartbeat: $passed_clean! Infrastructure state is stable."
+  else
+    echo "✓ SRE Heartbeat: All E2E test scenarios passed successfully! Infrastructure state is stable."
+  fi
   rm -f "$FAILURE_REPORT"
   exit 0
 else
