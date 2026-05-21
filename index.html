@@ -96,6 +96,11 @@
             <span class="rail-nav-label">Agency Portal</span>
           </button>
 
+          <button class="rail-nav-item" id="nav-rehearsal" onclick="switchTab('rehearsal')">
+            <span class="rail-nav-icon">🎤</span>
+            <span class="rail-nav-label">Presenter Rehearsal</span>
+          </button>
+
           <button class="rail-nav-item" id="nav-team-status" onclick="switchTab('team-status')">
             <span class="rail-nav-icon">💼</span>
             <span class="rail-nav-label">Team Status</span>
@@ -2124,6 +2129,129 @@
       </div>
     </div>
 
+    <!-- SECTION 8.8: INTERACTIVE AI PRESENTER REHEARSAL SANDBOX -->
+    <div id="view-rehearsal" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); padding-bottom: 1.25rem;">
+          <div>
+            <h2>🎤 Interactive AI Presenter Rehearsal Sandbox</h2>
+            <p>Practice Q&A product knowledge, smooth segment transitions, and pitch modulation under simulated client conditions prior to official dry runs.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <span style="font-size: 0.75rem; font-weight: 600; color: var(--text-secondary);">Cleared Audits:</span>
+            <span id="rehearsal-cleared-badge" style="background: rgba(52, 211, 153, 0.15); color: var(--success-green); padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: 800;">0 Rehearsals</span>
+          </div>
+        </div>
+
+        <div class="sandbox-split" style="grid-template-columns: 1.4fr 1fr; gap: 2rem;">
+          <!-- Left: Settings & Practice Workspace -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <!-- Step 1: Rehearsal settings -->
+            <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.02);">
+              <h3 style="color: var(--primary-cyan); font-size: 0.9rem; margin-top: 0; margin-bottom: 0.75rem;">Step 1: Rehearsal Configurations</h3>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="rehearsal-curriculum-select" style="font-size: 0.7rem; font-weight: 700;">Curriculum Topic Family</label>
+                  <select id="rehearsal-curriculum-select" class="form-control" style="height: 32px; font-size: 0.78rem; padding: 0.25rem;">
+                    <option value="GMP DV360">GMP: DV360 Advanced</option>
+                    <option value="GMP CM360">GMP: CM360 Foundations</option>
+                    <option value="Search PMax">Search & PMax Bidding</option>
+                    <option value="Video Social">Partnership Ads & YT Video</option>
+                  </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="rehearsal-difficulty-select" style="font-size: 0.7rem; font-weight: 700;">Q&A Challenge Depth</label>
+                  <select id="rehearsal-difficulty-select" class="form-control" style="height: 32px; font-size: 0.78rem; padding: 0.25rem;">
+                    <option value="101">101 Level (Foundational Platform)</option>
+                    <option value="201" selected>201 Level (Deep-Dive/Integration)</option>
+                    <option value="301">301 Level (Expert SME Escalation)</option>
+                  </select>
+                </div>
+              </div>
+              <button class="btn btn-primary" onclick="window.launchAiRehearsalSim()" style="width: 100%; font-size: 0.8rem; font-weight: 700; padding: 0.5rem; border-radius: 6px; margin-top: 0.75rem;">Launch Simulated AI Client Question 🚀</button>
+            </div>
+
+            <!-- Step 2: Simulated Q&A and Answer Area -->
+            <div class="chart-container-box" id="rehearsal-workspace-box" style="padding: 1.5rem; display: none;">
+              <h3 style="color: var(--warning-amber); font-size: 0.9rem; margin-top: 0; margin-bottom: 0.5rem; display: flex; justify-content: space-between;">
+                <span>Simulated Client Question</span>
+                <span id="rehearsal-question-difficulty-badge" style="font-size: 0.65rem; padding: 0.1rem 0.4rem; border-radius: 4px; background: rgba(251,191,36,0.12); color: var(--warning-amber);">201 Level</span>
+              </h3>
+              <div id="rehearsal-simulated-question-text" style="font-size: 0.9rem; font-weight: 600; color: var(--text-primary); line-height: 1.4; padding: 0.75rem; background: rgba(0, 233, 255, 0.03); border-left: 3px solid var(--primary-cyan); border-radius: 0 6px 6px 0; margin-bottom: 1rem;">
+                "Click Launch to trigger simulated client Q&A question."
+              </div>
+
+              <div class="form-group">
+                <label for="rehearsal-presenter-response" style="font-size: 0.75rem; font-weight: 700;">Your Answer Delivery Rehearsal</label>
+                <textarea id="rehearsal-presenter-response" class="form-control" rows="3" style="resize: none; font-size: 0.8rem; padding: 0.5rem;" placeholder="Type your technical response here to practice handling the client Q&A..."></textarea>
+              </div>
+
+              <!-- Slide Delivery Mechanics checklist -->
+              <div style="margin-bottom: 1rem;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); display: block; margin-bottom: 0.35rem;">Answer Delivery Mechanics Check:</span>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(0,0,0,0.15); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-light);">
+                  <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer;">
+                    <input type="checkbox" id="reh-filler-words" checked style="accent-color: var(--primary-cyan);"> Minimal filler words
+                  </label>
+                  <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer;">
+                    <input type="checkbox" id="reh-topic-transitions" checked style="accent-color: var(--primary-cyan);"> Smooth slide transitions
+                  </label>
+                  <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer;">
+                    <input type="checkbox" id="reh-voice-modulation" checked style="accent-color: var(--primary-cyan);"> Engaged pitch/modulation
+                  </label>
+                  <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.3rem; cursor: pointer;">
+                    <input type="checkbox" id="reh-no-speaker-notes" style="accent-color: var(--primary-cyan);"> Relied zero on speaker notes
+                  </label>
+                </div>
+              </div>
+
+              <button class="btn btn-primary" onclick="window.evaluatePresenterRehearsal()" style="width: 100%; font-size: 0.8rem; font-weight: 700; padding: 0.5rem; border-radius: 6px; background: var(--success-green); color: #000; border: none;">Submit Rehearsal & Log Evaluation 🎤</button>
+            </div>
+
+          </div>
+
+          <!-- Right: Performance Audit Feedbacks -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <!-- Rehearsal Scorecard -->
+            <div class="chart-container-box" id="rehearsal-scorecard-panel" style="padding: 1.25rem; display: none; border-color: var(--success-green); background: rgba(16,185,129,0.01);">
+              <h3 style="color: var(--success-green); font-size: 0.9rem; margin-top: 0; margin-bottom: 0.75rem;">Rehearsal Performance Evaluation</h3>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1rem;">
+                <div style="background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-light); text-align: center;">
+                  <div style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Q&A Accuracy</div>
+                  <div id="rehearsal-score-accuracy" style="font-size: 1.5rem; font-weight: 800; color: var(--success-green);">95%</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-light); text-align: center;">
+                  <div style="font-size: 0.65rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">Delivery Clarity</div>
+                  <div id="rehearsal-score-delivery" style="font-size: 1.5rem; font-weight: 800; color: var(--primary-cyan);">88%</div>
+                </div>
+              </div>
+
+              <div style="font-size: 0.75rem; color: var(--text-secondary); line-height: 1.4;">
+                <strong>SME Lead Recommendation Summary:</strong>
+                <p id="rehearsal-recommendation-text" style="margin-top: 0.2rem; padding: 0.45rem; background: rgba(255,255,255,0.03); border-radius: 4px; border: 1px solid var(--border-light);">
+                  "Excellent attribution mapping answer, but work on transitions between PMax assets and bidding strategies."
+                </p>
+              </div>
+            </div>
+
+            <!-- Past attempts history -->
+            <div class="chart-container-box" style="padding: 1.25rem; flex: 1;">
+              <h3 style="color: var(--text-primary); font-size: 0.9rem; margin-top: 0; margin-bottom: 0.75rem;">Local Rehearsal Attempts History</h3>
+              <div id="rehearsal-attempts-log-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 280px; overflow-y: auto; padding-right: 0.2rem;">
+                <!-- attempts populate dynamically -->
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding-top: 2rem;">No rehearsals logged in this session yet.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
     <!-- SECTION 9: HELP & ONBOARDING CENTER -->
     <div id="view-definitions" class="view-section">
       <div class="sandbox-panel">
@@ -2631,6 +2759,27 @@
         <div class="form-group" style="grid-column: span 2; margin-bottom: 0.5rem;">
           <label>EMEA / Session Meeting Link</label>
           <input type="text" id="kickoff-meeting-link" class="form-control" value="https://meet.google.com/gpeg-sessions-2026" style="border-radius: 4px; height: 30px; font-size: 0.75rem;">
+        </div>
+
+        <!-- Customized Slides Agenda Modules -->
+        <div class="form-group" id="kickoff-custom-modules-group" style="grid-column: span 2; margin-bottom: 0.5rem;">
+          <label style="font-weight: 700; display: flex; align-items: center; gap: 0.25rem; font-size: 0.75rem;">
+            <span>✨ Modular Slides Agenda Customizer</span>
+          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(255,255,255,0.02); padding: 0.5rem; border-radius: 6px; border: 1px solid var(--border-light); margin-top: 0.25rem;">
+            <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <input type="checkbox" id="mod-core-101" checked style="accent-color: var(--primary-cyan);"> Core Platform 101 Basics
+            </label>
+            <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <input type="checkbox" id="mod-advanced-201" style="accent-color: var(--primary-cyan);"> S2S API & Floodlights
+            </label>
+            <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <input type="checkbox" id="mod-looker-stats" style="accent-color: var(--primary-cyan);"> PLX/Looker Analytics
+            </label>
+            <label style="font-size: 0.72rem; display: flex; align-items: center; gap: 0.35rem; cursor: pointer;">
+              <input type="checkbox" id="mod-hotspot" checked style="accent-color: var(--primary-cyan);"> Hotspot Debugger
+            </label>
+          </div>
         </div>
 
         <!-- Comments -->

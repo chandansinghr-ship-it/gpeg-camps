@@ -636,6 +636,17 @@ function renderDashboard() {
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
           <span class="badge-deck-status ${camp.deckType === 'Customized Deck' ? 'badge-deck-custom' : ''}">${camp.deckType}</span>
+          ${camp.slaDaysRemaining !== null && camp.stage !== 'closed' ? `
+            <span class="badge-sla" style="font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; ${
+              camp.slaDaysRemaining <= 0 || camp.slaBreached
+                ? 'background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--danger-red);'
+                : camp.slaDaysRemaining <= 2
+                ? 'background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--warning-amber);'
+                : 'background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success-green);'
+            }">
+              ⏱️ ${camp.slaDaysRemaining}d left
+            </span>
+          ` : ''}
           <span class="badge-status" style="background: ${getStageBadgeColor(camp.status)}; color: #fff;">${camp.status}</span>
         </div>
 
@@ -1045,7 +1056,8 @@ window.submitAgencyDiscovery = function(caseId) {
   camp.discoveryData = {
     confidence,
     challenges,
-    topics: checkedTopics
+    topics: checkedTopics,
+    customModules: (camp.discoveryData && camp.discoveryData.customModules) ? camp.discoveryData.customModules : []
   };
   // Trigger customized deck adaptation
   camp.deckType = 'Customized Deck';
@@ -1570,6 +1582,12 @@ window.executeCampKickoffSubmit = async function() {
   const meetingLink = document.getElementById('kickoff-meeting-link').value.trim();
   const commentsVal = document.getElementById('kickoff-comments').value.trim();
 
+  const customModules = [];
+  if (document.getElementById('mod-core-101').checked) customModules.push('Core Platform 101 Basics');
+  if (document.getElementById('mod-advanced-201').checked) customModules.push('S2S API & Floodlights');
+  if (document.getElementById('mod-looker-stats').checked) customModules.push('PLX/Looker Analytics');
+  if (document.getElementById('mod-hotspot').checked) customModules.push('Hotspot Debugger');
+
   const payload = {
     product: eventTitle,
     presenter: presenter,
@@ -1582,7 +1600,8 @@ window.executeCampKickoffSubmit = async function() {
     psmLdap: psmLdap,
     meetingPlatformUrl: meetingLink,
     comments: commentsVal,
-    slaDate: slaDateStr
+    slaDate: slaDateStr,
+    customModules: customModules
   };
 
   try {
@@ -1601,6 +1620,8 @@ window.executeCampKickoffSubmit = async function() {
       const campIdx = state.camps.findIndex(c => c.id === caseId);
       if (campIdx !== -1) {
         state.camps[campIdx] = result.camp;
+        // Accrue pre-camp prep effort hours automatically
+        window.accrueEffortHours(result.camp, 'Pre-Camp');
       }
       state.outbox.unshift(result.mail);
       
@@ -1726,6 +1747,23 @@ function loadProgramSpecificChecklist(camp) {
     `;
   }
 
+  // Check if there are custom modules scheduled during kickoff
+  if (camp.discoveryData && camp.discoveryData.customModules && camp.discoveryData.customModules.length > 0) {
+    itemsHtml += `
+      <div style="margin-top: 0.5rem; padding-top: 0.4rem; border-top: 1px dashed var(--border-light); font-weight: 700; font-size: 0.75rem; color: var(--primary-cyan); text-transform: uppercase; letter-spacing: 0.3px;">
+        ✨ Custom Scheduled Modules:
+      </div>
+    `;
+    camp.discoveryData.customModules.forEach((mod, i) => {
+      itemsHtml += `
+        <div class="checklist-item" style="margin-top: 0.25rem;">
+          <input type="checkbox" id="chk-custom-mod-${i}" style="accent-color: var(--primary-cyan); cursor: pointer;">
+          <label for="chk-custom-mod-${i}" style="font-size: 0.75rem;">"${mod}" segment checked off</label>
+        </div>
+      `;
+    });
+  }
+
   container.innerHTML = itemsHtml;
 }
 
@@ -1827,6 +1865,9 @@ window.finishLiveSession = function() {
   camp.status = 'Resolving Queries & Follow-up';
   camp.slaDaysRemaining = 2; // 48h Follow-up SLA window begins!
   
+  // Accrue in-camp delivery hours automatically
+  window.accrueEffortHours(camp, 'In-Camp');
+  
   saveState();
   window.closeModal('modal-livesession');
   
@@ -1920,6 +1961,9 @@ window.executeSendFollowUp = function() {
   camp.followUpSent = true;
   camp.status = 'Awaiting Feedback';
   camp.slaDaysRemaining = 4; // Set first 4-day follow-up reminder
+
+  // Accrue post-camp effort hours automatically
+  window.accrueEffortHours(camp, 'Post-Camp');
 
   const teamsUrl = document.getElementById('followup-teams-url').value.trim();
   const internalShare = document.getElementById('followup-internal-share').value.trim();
@@ -2599,12 +2643,34 @@ window.handleDrop = function(e) {
     }
     window.startLiveSessionPrompt(camp.id);
   } else if (camp.stage === 'post-camp' && targetStage === 'closed') {
-    // Automated Compliance Hard Gating: Block Teams camps lacking a verified Recording URL coordinate
+    // Automated Compliance Hard Gating: Check follow-up package dispatch
+    if (!camp.followUpSent) {
+      showToast('Compliance Gate blocked', `⚠️ Compliance Block: Case ${camp.id} requires sending follow-up package first.`);
+      window.logAction('WARNING', `Compliance Gate: Blocked Closed pipeline drop for Case ${camp.id} (follow-up package not sent).`);
+      const cardEl = document.querySelector(`.camp-card[data-id="${camp.id}"]`);
+      if (cardEl) {
+        cardEl.classList.add('compliance-locked-card');
+        setTimeout(() => cardEl.classList.remove('compliance-locked-card'), 3000);
+      }
+      return;
+    }
+
+    // Check Google Meet session recording archival status
+    if (camp.platform === 'Meet' && !camp.recordingArchived) {
+      showToast('Compliance Gate blocked', `⚠️ Compliance Block: Google Meet Case ${camp.id} lacks archived Session Recording.`);
+      window.logAction('WARNING', `Compliance Gate: Blocked Closed pipeline drop for Meet Case ${camp.id} (recording unarchived).`);
+      const cardEl = document.querySelector(`.camp-card[data-id="${camp.id}"]`);
+      if (cardEl) {
+        cardEl.classList.add('compliance-locked-card');
+        setTimeout(() => cardEl.classList.remove('compliance-locked-card'), 3000);
+      }
+      return;
+    }
+
+    // Block Teams camps lacking a verified Recording URL coordinate
     if (camp.platform === 'Teams' && !camp.teamsRecordingUrl) {
       showToast('Compliance Gate blocked', `⚠️ Compliance Block: MS Teams Case ${camp.id} lacks verified Recording URL.`);
       window.logAction('WARNING', `Compliance Gate: Blocked Closed pipeline drop for Teams Case ${camp.id} (recording unverified).`);
-      
-      // Trigger dynamic visual error pulsing border on card
       const cardEl = document.querySelector(`.camp-card[data-id="${camp.id}"]`);
       if (cardEl) {
         cardEl.classList.add('compliance-locked-card');
@@ -2662,13 +2728,38 @@ window.timeTravel = function(days) {
     if (camp.stage !== 'closed') {
       if (camp.slaDaysRemaining !== null) {
         camp.slaDaysRemaining = Math.max(0, camp.slaDaysRemaining - days);
-        if (camp.slaDaysRemaining === 0) {
+        if (camp.slaDaysRemaining === 0 && !camp.slaBreached) {
           camp.slaBreached = true;
           camp.deckType = 'Standard Deck'; // SLA breach auto reverts to default deck protocol!
           camp.status = 'SLA Breached ⚠️';
           
           window.logAction('WARNING', `SLA Expiration: Case ${camp.id} Discovery SLA breached! Automatically reverted to Standard Default Deck Protocol.`);
           showToast('SLA Breached!', `Case ${camp.id} has breached its discovery form SLA.`);
+          
+          // Generate automated SLA Breach notification email in Outbox
+          const breachMail = {
+            id: `m${Math.floor(Math.random() * 90000) + 10000}`,
+            timestamp: new Date(state.simulatedTime).toISOString(),
+            from: 'gpeg-camps@google.com',
+            to: camp.amEmail,
+            cc: 'gpeg-camps-leads@google.com',
+            bcc: '',
+            subject: `ALERT: Pre-Camp Customization Window Closed for ${camp.agency}`,
+            body: `Hi AM,\n\nThe Discovery Form submission deadline for Case #${camp.id} has passed. Under GPEG SLA protocols, we require a minimum of one/two weeks of lead time to custom compile deck materials.\n\nAs a result, Case #${camp.id} has been reverted to Standard Default Deck Protocol.\n\nBest,\nGPEG Camps Team`
+          };
+          
+          state.outbox.unshift(breachMail);
+          
+          if (typeof window === 'undefined' || !window.isTestRunnerEnv) {
+            fetch('/api/outbox', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-GPEG-Session': currentSessionToken
+              },
+              body: JSON.stringify(breachMail)
+            }).catch(err => console.error('Failed to push breach email to server:', err));
+          }
         }
       }
     }
@@ -5561,6 +5652,277 @@ window.runGcsDatabaseBackup = async function() {
     btn.disabled = false;
     btn.textContent = "Backup camps.db to gs://gpeg/";
   }
+};
+
+// ============================================================================
+// --- PHASE 2: INTERACTIVE AI PRESENTER REHEARSAL SANDBOX ---
+// ============================================================================
+
+const simulatedClientQuestions = {
+  'GMP DV360': {
+    '101': [
+      "What are the foundational differences between a standard insertion order and a line item in DV360?",
+      "How do we configure a standard campaign tracking pixel for display creatives in Campaign Manager 360?"
+    ],
+    '201': [
+      "How do custom floodlight variables integrate programmatically with the S2S conversion API in DV360?",
+      "What are the exact latency parameters when syncing dynamic target lists between GA4 and DV360 audience segments?"
+    ],
+    '301': [
+      "Italian translation delays block custom bidding script launches. Can Italian campaigns proceed on English draft scripts?",
+      "A global holding group requires dynamic multi-advertiser configurations across different legal entity seats. How do we prevent strategic framework leaks?"
+    ]
+  },
+  'GMP CM360': {
+    '101': [
+      "What is the standard hierarchy of placements, ads, and creatives in CM360?",
+      "How do you create and export a basic placement tracking spreadsheet for publishers?"
+    ],
+    '201': [
+      "Can custom Floodlights be passed programmatically via S2S API without a web tag or Google Tag Manager?",
+      "How do you troubleshoot attribution mismatches when conversion cookies are blocked by third-party browser settings?"
+    ],
+    '301': [
+      "Is the TikTok Server-to-Server CM360 integration beta enrollment short list open for all Growth advertisers in EMEA?",
+      "How do you resolve cross-channel duplicate conversion counts when integrating both CM360 and search attribution models simultaneously?"
+    ]
+  },
+  'Search PMax': {
+    '101': [
+      "What are the minimum asset requirements to set up a Performance Max campaign in Google Ads?",
+      "What is the recommended budget setup when launching a foundational Search campaign alongside Smart Bidding?"
+    ],
+    '201': [
+      "How does Web-to-App Connect (W2AC) script integration affect conversion value calculation in PMax campaigns?",
+      "What budget pacing strategies should we use when transitioning Search keyword campaigns into a value-first PMax framework?"
+    ],
+    '301': [
+      "How should the team coordinate budget allocations between Demand Gen and PMax when running holistic brand + performance campaigns?",
+      "How do we debug conversion value modeling discrepancies when Italy-based campaigns report 0 value uplift despite optimal ARR?"
+    ]
+  },
+  'Video Social': {
+    '101': [
+      "What are the recommended video lengths and formats for a YouTube Shorts direct-response campaign?",
+      "What is the menu of services standard duration boundary for YT foundational video sessions?"
+    ],
+    '201': [
+      "How do you configure MFG / WPP concise 45-60 min limit YouTube campaigns in Google Ads?",
+      "What is the recommended creative testing methodology to improve engagement rates on non-skippable in-stream ads?"
+    ],
+    '301': [
+      "Strategic frameworks in video masterclass decks are confidential. How do we prepare external-friendly summaries for pre-read requests?",
+      "How do we bypass Portuguese translation lead times when video campaigns require immediate activation in Lisbon?"
+    ]
+  }
+};
+
+let activeRehearsalQuestion = null;
+let activeRehearsalDifficulty = null;
+let activeRehearsalTopic = null;
+let rehearsalClearedCount = 0;
+let rehearsalAttempts = [];
+
+window.launchAiRehearsalSim = function() {
+  const topic = document.getElementById('rehearsal-curriculum-select').value;
+  const diff = document.getElementById('rehearsal-difficulty-select').value;
+  
+  const list = simulatedClientQuestions[topic][diff];
+  const question = list[Math.floor(Math.random() * list.length)];
+  
+  activeRehearsalQuestion = question;
+  activeRehearsalDifficulty = diff;
+  activeRehearsalTopic = topic;
+  
+  // Reset inputs
+  document.getElementById('rehearsal-presenter-response').value = '';
+  document.getElementById('reh-filler-words').checked = true;
+  document.getElementById('reh-topic-transitions').checked = false;
+  document.getElementById('reh-voice-modulation').checked = true;
+  document.getElementById('reh-no-speaker-notes').checked = false;
+  
+  // Display Workspace
+  document.getElementById('rehearsal-workspace-box').style.display = 'block';
+  document.getElementById('rehearsal-scorecard-panel').style.display = 'none';
+  
+  document.getElementById('rehearsal-simulated-question-text').textContent = `"${question}"`;
+  
+  const badge = document.getElementById('rehearsal-question-difficulty-badge');
+  badge.textContent = `${diff} Level`;
+  if (diff === '101') {
+    badge.style.background = 'rgba(52, 211, 153, 0.12)';
+    badge.style.color = 'var(--success-green)';
+  } else if (diff === '201') {
+    badge.style.background = 'rgba(251, 191, 36, 0.12)';
+    badge.style.color = 'var(--warning-amber)';
+  } else {
+    badge.style.background = 'rgba(248, 113, 113, 0.12)';
+    badge.style.color = 'var(--danger-red)';
+  }
+  
+  window.logAction('INFO', `AI Rehearsal: Launched simulated client question for topic [${topic}] at ${diff} level.`);
+};
+
+window.evaluatePresenterRehearsal = function() {
+  const responseText = document.getElementById('rehearsal-presenter-response').value.trim();
+  if (!responseText) {
+    alert("Please type your answer response before submitting!");
+    return;
+  }
+  
+  const checkFiller = document.getElementById('reh-filler-words').checked;
+  const checkTrans = document.getElementById('reh-topic-transitions').checked;
+  const checkMod = document.getElementById('reh-voice-modulation').checked;
+  const checkNotes = document.getElementById('reh-no-speaker-notes').checked;
+  
+  // Calculate pseudo-random performance scores influenced by checkboxes!
+  let accuracy = 75 + Math.floor(Math.random() * 15); // Base accuracy
+  if (responseText.length > 80) accuracy += 5;
+  if (responseText.toLowerCase().includes('attribution') || responseText.toLowerCase().includes('s2s') || responseText.toLowerCase().includes('budget')) {
+    accuracy += 5;
+  }
+  accuracy = Math.min(100, accuracy);
+  
+  let delivery = 60;
+  if (checkFiller) delivery += 10;
+  if (checkTrans) delivery += 10;
+  if (checkMod) delivery += 10;
+  if (checkNotes) delivery += 10;
+  delivery += Math.floor(Math.random() * 10);
+  delivery = Math.min(100, delivery);
+  
+  let recommendation = "";
+  if (accuracy >= 90 && delivery >= 85) {
+    recommendation = "Excellent rehearsal handling! Content is technically sound, filler words are minimal, and modulation remains engaging. Ready for dry run endorsement.";
+  } else if (accuracy < 85) {
+    recommendation = "Technical accuracy needs a slight check. Review GPEG product availability matrices and feature latencies. Focus on standard definitions.";
+  } else {
+    recommendation = "Strong technical grasp, but delivery mechanics are dry. modulate your voice pitch to maintain client engagement, and avoid reliance on speaker notes.";
+  }
+  
+  // Increment Cleared Audits if passed threshold
+  const isCleared = accuracy >= 80 && delivery >= 75;
+  if (isCleared) {
+    rehearsalClearedCount++;
+    document.getElementById('rehearsal-cleared-badge').textContent = `${rehearsalClearedCount} Cleared`;
+    document.getElementById('rehearsal-cleared-badge').style.background = 'rgba(52, 211, 153, 0.15)';
+    document.getElementById('rehearsal-cleared-badge').style.color = 'var(--success-green)';
+  }
+  
+  // Update Scorecard display
+  document.getElementById('rehearsal-score-accuracy').textContent = `${accuracy}%`;
+  document.getElementById('rehearsal-score-accuracy').style.color = accuracy >= 85 ? 'var(--success-green)' : 'var(--warning-amber)';
+  
+  document.getElementById('rehearsal-score-delivery').textContent = `${delivery}%`;
+  document.getElementById('rehearsal-score-delivery').style.color = delivery >= 80 ? 'var(--primary-cyan)' : 'var(--warning-amber)';
+  
+  document.getElementById('rehearsal-recommendation-text').textContent = `"${recommendation}"`;
+  document.getElementById('rehearsal-scorecard-panel').style.display = 'block';
+  
+  // Log Attempt
+  const attempt = {
+    timestamp: new Date(state.simulatedTime || "2026-05-18T14:34:38Z").toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+    topic: activeRehearsalTopic,
+    difficulty: activeRehearsalDifficulty,
+    accuracy: accuracy,
+    delivery: delivery,
+    status: isCleared ? "Endorsed ✓" : "Re-run Needed"
+  };
+  rehearsalAttempts.unshift(attempt);
+  
+  // Render Attempts list
+  renderRehearsalAttemptsList();
+  
+  window.logAction(isCleared ? 'SUCCESS' : 'WARNING', `AI Rehearsal: Submitted rehearsal audit. Score: Accuracy ${accuracy}%, Delivery ${delivery}%. Status: [${attempt.status}].`);
+  showToast('Rehearsal Evaluated 🎤', isCleared ? 'Endorsed! Audit successfully cleared.' : 'Audit logged. Retake recommended.');
+};
+
+function renderRehearsalAttemptsList() {
+  const listEl = document.getElementById('rehearsal-attempts-log-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+  
+  if (rehearsalAttempts.length === 0) {
+    listEl.innerHTML = '<div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding-top: 2rem;">No rehearsals logged in this session yet.</div>';
+    return;
+  }
+  
+  rehearsalAttempts.forEach(att => {
+    listEl.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="border-left: 3px solid ${att.status === 'Endorsed ✓' ? 'var(--success-green)' : 'var(--warning-amber)'}; background: rgba(255,255,255,0.02); padding: 0.5rem 0.75rem;">
+        <div style="display: flex; justify-content: space-between; font-weight: 700; font-size: 0.75rem; color: var(--text-primary);">
+          <span>${att.topic} (${att.difficulty})</span>
+          <span style="color: ${att.status === 'Endorsed ✓' ? 'var(--success-green)' : 'var(--warning-amber)'};">${att.status}</span>
+        </div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-secondary); margin-top: 0.15rem;">
+          <span>Accuracy: <strong>${att.accuracy}%</strong> | Delivery: <strong>${att.delivery}%</strong></span>
+          <span>🕒 ${att.timestamp}</span>
+        </div>
+      </div>
+    `);
+  });
+}
+
+// ============================================================================
+// --- PHASE 3: GAMIFIED PRESENTATION UTILIZATION & WORKMATE ACCRUALS ---
+// ============================================================================
+
+window.accrueEffortHours = function(camp, type) {
+  if (!camp.presenter) return;
+
+  const is201 = camp.product && camp.product.includes('201');
+  let hours = 0;
+  let taskName = '';
+
+  if (type === 'Pre-Camp') {
+    hours = is201 ? 6.0 : 3.0;
+    taskName = `SLA Auto-Accrued Prep Hours (${is201 ? '201 Complex' : '101 Foundational'})`;
+  } else if (type === 'In-Camp') {
+    hours = is201 ? 2.5 : 1.5;
+    taskName = `SLA Auto-Accrued Delivery Hours (${is201 ? '201 Complex' : '101 Foundational'})`;
+  } else if (type === 'Post-Camp') {
+    hours = 1.5;
+    taskName = `SLA Auto-Accrued Wrap-Up & FAQ Packing`;
+  }
+
+  // 1. Create effort log entry
+  const logId = `e${Math.floor(Math.random() * 90000) + 10000}`;
+  const newLog = {
+    id: logId,
+    caseId: camp.id,
+    agency: camp.agency,
+    name: camp.presenter,
+    taskType: type,
+    taskName: taskName,
+    hours: hours
+  };
+
+  // Prevent duplicate logs for same caseId + taskType combo
+  const duplicate = state.effortLogs.some(log => log.caseId === camp.id && log.taskType === type);
+  if (duplicate) return;
+
+  state.effortLogs.push(newLog);
+  localStorage.setItem('gpeg_effort_logs', JSON.stringify(state.effortLogs));
+
+  // 2. Update weekly utilization log for that presenter
+  const weekEndingStr = "2026-05-22"; // Standard simulated active week ending
+  const presenterName = camp.presenter.split(' ')[0]; // e.g. "Taylor"
+  const utilRow = state.weeklyUtilization.find(u => u.name.includes(presenterName) && u.weekEnding === weekEndingStr);
+  
+  if (utilRow) {
+    utilRow.loggedHrs = parseFloat((utilRow.loggedHrs + hours).toFixed(1));
+    const ratio = utilRow.loggedHrs / utilRow.expectedHrs;
+    if (ratio > 1.1) {
+      utilRow.status = 'Overutilized';
+    } else if (ratio >= 0.8) {
+      utilRow.status = 'Optimal';
+    } else {
+      utilRow.status = 'Underutilized';
+    }
+    localStorage.setItem('gpeg_weekly_utilization', JSON.stringify(state.weeklyUtilization));
+  }
+
+  window.logAction('SUCCESS', `Workmate Auto-Accrual: Automatically logged ${hours} hours effort for ${presenterName} under ${type} - ${taskName}.`);
 };
 
 
