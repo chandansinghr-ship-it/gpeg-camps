@@ -6,4 +6,6 @@
 !README.md
 !camps_command_center_playbook.md
 !camps_command_center_executive_one_pager.md
+!agent_checkpoint_helper.py
+!agent_heartbeat_guard.sh
 !.gitignore
