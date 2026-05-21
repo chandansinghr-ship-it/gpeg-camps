@@ -208,9 +208,6 @@
             <label for="m-filter-suite" style="font-size: 0.7rem; font-weight: 700; color: var(--g-text-secondary); display: block; margin-bottom: 0.2rem;">Product Suite <span class="tooltip-trigger" data-tooltip="Filters workshops by platform family (e.g. Google Marketing Platform, Search, or Video).">ⓘ</span></label>
             <select id="m-filter-suite" class="form-control" onchange="window.applyMatrixFilters()" style="font-size: 0.75rem; padding: 0.25rem; height: 30px; margin-bottom: 0; border-radius: 4px;">
               <option value="ALL">-- All Suites --</option>
-              <option value="AI, Search & Commerce">Suite A: AI & Search</option>
-              <option value="Video & Social">Suite B: Video & Social</option>
-              <option value="Google Marketing Platform (GMP)">Suite C: GMP Suite</option>
             </select>
           </div>
 
@@ -219,9 +216,6 @@
             <label for="m-filter-goal" style="font-size: 0.7rem; font-weight: 700; color: var(--g-text-secondary); display: block; margin-bottom: 0.2rem;">Strategic Goal <span class="tooltip-trigger" data-tooltip="Filters workshops by business focus (e.g. activating new products, resolving hotspots, or delegating operations).">ⓘ</span></label>
             <select id="m-filter-goal" class="form-control" onchange="window.applyMatrixFilters()" style="font-size: 0.75rem; padding: 0.25rem; height: 30px; margin-bottom: 0; border-radius: 4px;">
               <option value="ALL">-- All Goals --</option>
-              <option value="Product Activation">Activation (Adopt)</option>
-              <option value="Obviating Troubleshooting">Obviation (Hotspot)</option>
-              <option value="Externalizing Solutions">Externalization (Opex)</option>
             </select>
           </div>
 
@@ -241,8 +235,6 @@
             <label for="m-filter-level" style="font-size: 0.7rem; font-weight: 700; color: var(--g-text-secondary); display: block; margin-bottom: 0.2rem;">Curriculum Level <span class="tooltip-trigger" data-tooltip="Filters workshops by technical depth (101 for basics, 201 for advanced deep-dives).">ⓘ</span></label>
             <select id="m-filter-level" class="form-control" onchange="window.applyMatrixFilters()" style="font-size: 0.75rem; padding: 0.25rem; height: 30px; margin-bottom: 0; border-radius: 4px;">
               <option value="ALL">-- All Levels --</option>
-              <option value="101">101 Foundational</option>
-              <option value="201">201 Deep-Dive</option>
             </select>
           </div>
 
@@ -2265,6 +2257,35 @@
   impact_report <span class="sql-type">STRING</span>(MAX),
   comment <span class="sql-type">STRING</span>(MAX)
 ) <span class="sql-keyword">PRIMARY KEY</span> (case_id);
+
+<span class="sql-comment">-- Table: High-level camps catalog mapped from MoS Columns A-I</span>
+<span class="sql-keyword">CREATE TABLE</span> gpeg_mos_camps (
+  camp_id <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,
+  strategic_goal <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,        -- e.g., Activate, Obviate, Externalize
+  category <span class="sql-type">STRING</span>(128) <span class="sql-keyword">NOT NULL</span>,              -- e.g., YouTube +, Search +, Platform - GMP +
+  camp_name <span class="sql-type">STRING</span>(128) <span class="sql-keyword">NOT NULL</span>,             -- e.g., YouTube Camp, DemandGen Camp
+  launch_status <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,          -- e.g., Live - 2026 Update in Progress
+  regional_availability <span class="sql-type">STRING</span>(128),          -- e.g., Global, APAC
+  channel_availability <span class="sql-type">STRING</span>(128),           -- e.g., LCS & GCS, LCS Only
+  whats_new_summary <span class="sql-type">STRING</span>(MAX),              -- Summary of 2026 updates
+  comments_highlights <span class="sql-type">STRING</span>(MAX)             -- Internal comments and notes
+) <span class="sql-keyword">PRIMARY KEY</span> (camp_id);
+
+<span class="sql-comment">-- Table: Granular topics catalog mapped from MoS Columns J-S</span>
+<span class="sql-keyword">CREATE TABLE</span> gpeg_mos_topics (
+  topic_id <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,
+  camp_id <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,
+  topic_category <span class="sql-type">STRING</span>(128),                 -- e.g., YouTube Brand Camps, Display & Video
+  activation_path <span class="sql-type">STRING</span>(32) <span class="sql-keyword">NOT NULL</span>,        -- e.g., 101, 201, 301, Masterclass
+  topic_name <span class="sql-type">STRING</span>(256) <span class="sql-keyword">NOT NULL</span>,            -- e.g., 101- Introduction to Ai Powered Video Campaigns
+  focus_area_detail <span class="sql-type">STRING</span>(MAX),
+  launch_status <span class="sql-type">STRING</span>(64) <span class="sql-keyword">NOT NULL</span>,          -- e.g., Available, WIP
+  duration_minutes <span class="sql-type">INT64</span>,
+  base_deck_title <span class="sql-type">STRING</span>(256),
+  product_update_ref <span class="sql-type">STRING</span>(MAX),
+  target_bfm <span class="sql-type">STRING</span>(128),
+  <span class="sql-keyword">CONSTRAINT</span> FK_TopicCampId <span class="sql-keyword">FOREIGN KEY</span> (camp_id) <span class="sql-keyword">REFERENCES</span> gpeg_mos_camps (camp_id)
+) <span class="sql-keyword">PRIMARY KEY</span> (topic_id);
 
 <span class="sql-comment">-- Table: operational SLA countdown tracker</span>
 <span class="sql-keyword">CREATE TABLE</span> camp_sla_tracker (

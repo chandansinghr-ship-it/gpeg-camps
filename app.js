@@ -1,4 +1,4 @@
-import { initialCamps, initialLogs, initialTasks, initialChats, initialTemplates, initialTeamRoster, initialWeeklyUtilization, initialEffortLogs } from './data.js';
+import { initialCamps, initialLogs, initialTasks, initialChats, initialTemplates, initialTeamRoster, initialWeeklyUtilization, initialEffortLogs, mosCamps, mosTopics } from './data.js';
 
 // --- STATE MANAGEMENT ---
 let currentSessionToken = localStorage.getItem('gpeg_session_token') || '';
@@ -15,6 +15,8 @@ let state = {
   authenticatedAgencyCaseId: null,
   simulatedTime: "2026-05-18T14:34:38Z",
   selectedAnalyticsRegion: null,
+  mosCamps: [],
+  mosTopics: [],
   
   // UX Refactoring Extensions
   simulatorModeActive: true,
@@ -270,9 +272,14 @@ function initState() {
     localStorage.setItem('gpeg_effort_logs', JSON.stringify(state.effortLogs));
   }
 
+  // Seeding dynamic MoS consolidated catalogs E2E
+  state.mosCamps = [...mosCamps];
+  state.mosTopics = [...mosTopics];
+
   // Run Automated Data Retention Cron on startup
   if (window.runRetentionCron) window.runRetentionCron();
   if (window.decoupleSpannerDdlToAdmin) window.decoupleSpannerDdlToAdmin();
+  if (window.populateMatrixFiltersFromCatalog) window.populateMatrixFiltersFromCatalog();
 
   // Initialize Progressive Disclosure Simulator Toggles on startup
   if (window.toggleSimulatorMode) {
@@ -7271,6 +7278,50 @@ window.renderAdminHubView = function() {
 
   // Log technical transaction
   window.logAction('INFO', `Developer Console: Programmatically verified Cloud Spanner database bindings. 0 anomalies detected.`);
+};
+
+// --- MoS CATALOG REDESIGN: DYNAMIC MATRIX FILTER ENGINE POPULATOR (Reconstruction Step 2) ---
+window.populateMatrixFiltersFromCatalog = function() {
+  const suiteSelect = document.getElementById('m-filter-suite');
+  const goalSelect = document.getElementById('m-filter-goal');
+  const levelSelect = document.getElementById('m-filter-level');
+
+  if (!state.mosCamps || !state.mosTopics) return;
+
+  // 1. Populate Product Suite (Category) dynamically
+  if (suiteSelect) {
+    const suites = [...new Set(state.mosCamps.map(c => c.category))];
+    suites.forEach(suite => {
+      const opt = document.createElement('option');
+      opt.value = suite;
+      opt.textContent = `Suite: ${suite}`;
+      suiteSelect.appendChild(opt);
+    });
+  }
+
+  // 2. Populate Strategic Goals dynamically
+  if (goalSelect) {
+    const goals = [...new Set(state.mosCamps.map(c => c.strategicGoal))];
+    goals.forEach(goal => {
+      const opt = document.createElement('option');
+      opt.value = goal;
+      opt.textContent = `${goal} Focus`;
+      goalSelect.appendChild(opt);
+    });
+  }
+
+  // 3. Populate Curriculum Level dynamically
+  if (levelSelect) {
+    const levels = [...new Set(state.mosTopics.map(t => t.activationPath))];
+    levels.forEach(lvl => {
+      const opt = document.createElement('option');
+      opt.value = lvl;
+      opt.textContent = `${lvl} Tier`;
+      levelSelect.appendChild(opt);
+    });
+  }
+
+  window.logAction('SUCCESS', `Menu of Service Catalog: Dynamically populated matrix filter selectors from live Spanner tables.`);
 };
 
 

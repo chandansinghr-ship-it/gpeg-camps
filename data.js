@@ -247,3 +247,18 @@ export const initialEffortLogs = [
   { id: "e3", caseId: "4-9901000031200", agency: "Publicis Groupe", name: "Jordan Blake", taskType: "Post-Camp", taskName: "Q&A Technical Resolution & Packing", hours: 3.0 },
   { id: "e4", caseId: "2-9828000040100", agency: "Omnicom Group", name: "Taylor Chen", taskType: "Pre-Camp", taskName: "Presenter Scheduling Coordination", hours: 1.5 }
 ];
+
+export const mosCamps = [
+  { campId: "c_yt", strategicGoal: "Activate", category: "YouTube +", campName: "YouTube Brand Camp", launchStatus: "Available" },
+  { campId: "c_dg", strategicGoal: "Activate", category: "YouTube +", campName: "Demand Gen Camp", launchStatus: "Available" },
+  { campId: "c_pmax", strategicGoal: "Activate", category: "Search +", campName: "PMax & Brand Camp", launchStatus: "Available" },
+  { campId: "c_gmp", strategicGoal: "Obviate", category: "Platform - GMP +", campName: "GMP Campaign Foundations", launchStatus: "Available" }
+];
+
+export const mosTopics = [
+  { topicId: "t_yt_1", campId: "c_yt", topicCategory: "YouTube Brand", activationPath: "101", topicName: "101- Introduction to AI Powered Video - VRC & VVC Overview", durationMinutes: 60, targetBfm: "Brand AI-Powered Depth", baseDeckTitle: "gPEG ( Base Deck ) - YT Camp (Intro, VRC & VVC Overview)" },
+  { topicId: "t_yt_2", campId: "c_yt", topicCategory: "YouTube Brand", activationPath: "201", topicName: "201- Deep Dive: Advanced Bidding & Creative Formats", durationMinutes: 90, targetBfm: "Brand AI-Powered Depth", baseDeckTitle: "gPEG ( Base Deck ) - YT Camp (Bidding & Advanced Formats)" },
+  { topicId: "t_dg_1", campId: "c_dg", topicCategory: "Display & Video", activationPath: "101", topicName: "101- Introduction to Demand Gen Social & Bidding", durationMinutes: 60, targetBfm: "Demand Gen Social Growth", baseDeckTitle: "gPEG ( Base Deck ) - DemandGen Camp (Social & Bidding)" },
+  { topicId: "t_pmax_1", campId: "c_pmax", topicCategory: "Search & Commerce", activationPath: "201", topicName: "201- Search & PMax Bidding Custom Allocations", durationMinutes: 90, targetBfm: "PMax AI Bidding Efficiency", baseDeckTitle: "gPEG ( Base Deck ) - PMax Camp (Bidding & Budget)" },
+  { topicId: "t_gmp_1", campId: "c_gmp", topicCategory: "GMP Platforms", activationPath: "101", topicName: "101- GMP CM360 Foundations & S2S API variables", durationMinutes: 60, targetBfm: "GMP Campaign Obviation", baseDeckTitle: "gPEG ( Base Deck ) - CM360 Camp (Foundations & Ingress)" }
+];
