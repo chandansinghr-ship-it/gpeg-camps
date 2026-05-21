@@ -6201,5 +6201,76 @@ window.renderAssociatesRosterDetail = function() {
   });
 };
 
+// --- FUTURE ADD-ONS & SUGGESTION BOX CONTROLLER ---
+let featureVotesState = { 1: 14, 2: 8, 3: 21 };
+let votedList = new Set();
+
+window.upvoteFeatureAddon = function(addonId) {
+  if (votedList.has(addonId)) {
+    showToast('Vote Already Logged', 'You have already upvoted this future extension module.');
+    return;
+  }
+
+  featureVotesState[addonId]++;
+  votedList.add(addonId);
+
+  // Update UI
+  const countEl = document.getElementById(`vote-count-${addonId}`);
+  if (countEl) countEl.textContent = featureVotesState[addonId];
+
+  const btnEl = document.getElementById(`btn-vote-${addonId}`);
+  if (btnEl) {
+    btnEl.style.background = 'rgba(52, 211, 153, 0.12)';
+    btnEl.style.borderColor = 'var(--success-green)';
+    btnEl.style.color = 'var(--success-green)';
+    btnEl.innerHTML = `✓ ${featureVotesState[addonId]}`;
+  }
+
+  const addonNames = {
+    1: "🎙️ AI Voice Speech Evaluator",
+    2: "🤖 Buganizer Router Trigger",
+    3: "📊 Google Sheets E2E Sync"
+  };
+
+  window.logAction('SUCCESS', `Add-on Upvoted: User upvoted future extension concept: [${addonNames[addonId]}].`);
+  showToast('Vote Recorded 👍', 'Thank you for voting! Feedback logged E2E.');
+};
+
+window.submitCustomSuggestion = function() {
+  const inputEl = document.getElementById('custom-suggestion-input');
+  if (!inputEl) return;
+
+  const suggestion = inputEl.value.trim();
+  if (!suggestion) {
+    alert("Please type your feature suggestion before submitting!");
+    return;
+  }
+
+  // Save to local storage logs and memory lists
+  const logs = JSON.parse(localStorage.getItem('gpeg_logs') || '[]');
+  logs.push({
+    timestamp: new Date().toISOString(),
+    level: 'SUCCESS',
+    message: `Feature Suggestion: Stakeholder submitted custom extension request: "${suggestion}"`
+  });
+  localStorage.setItem('gpeg_logs', JSON.stringify(logs));
+  
+  // Trigger state reload if activity view is loaded
+  if (state.logs) {
+    state.logs.push({
+      timestamp: new Date().toISOString(),
+      level: 'SUCCESS',
+      message: `Feature Suggestion: Stakeholder submitted custom extension request: "${suggestion}"`
+    });
+    if (typeof renderActivityTrackerAuditLogs === 'function') {
+      renderActivityTrackerAuditLogs();
+    }
+  }
+
+  inputEl.value = '';
+  window.logAction('SUCCESS', `Suggestion Logged: Registered custom suggestion: "${suggestion}" in Spanner audit ledger.`);
+  showToast('Suggestion Ingested 🚀', 'Feature request logged. Thank you for your feedback!');
+};
+
 
 

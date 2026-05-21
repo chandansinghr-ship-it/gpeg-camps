@@ -856,8 +856,38 @@
 
             <div class="chart-container-box" style="padding: 1.25rem;">
               <h3 style="color: var(--g-amber); margin-bottom: 0.5rem;">Recent Submissions</h3>
-              <div id="ux-survey-recent-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 220px; overflow-y: auto;">
+              <div id="ux-survey-recent-list" style="display: flex; flex-direction: column; gap: 0.5rem; max-height: 140px; overflow-y: auto;">
                 <!-- Recent surveys dynamically inject -->
+              </div>
+            </div>
+
+            <!-- 💡 Command Center Suggestion & Add-ons Voter -->
+            <div class="chart-container-box" style="padding: 1.25rem; border-color: var(--primary-cyan-dim); background: rgba(0, 233, 255, 0.01);">
+              <h3 style="color: var(--primary-cyan); margin-bottom: 0.50rem; display: flex; align-items: center; gap: 0.35rem; margin-top:0;">
+                <span>💡 Future Feature Add-ons Voter</span>
+              </h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.25; margin-bottom: 0.5rem;">Upvote pre-designed future extensions or submit your custom suggestions directly:</p>
+              
+              <!-- Predefined Voter Rows -->
+              <div style="display: flex; flex-direction: column; gap: 0.45rem; margin-bottom: 0.75rem;" id="suggestion-voter-list">
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 0.35rem 0.55rem; border-radius: 6px; font-size: 0.72rem;">
+                  <span style="color: var(--text-secondary);">🎙️ AI Voice Speech Evaluator</span>
+                  <button class="btn-sm" id="btn-vote-1" onclick="window.upvoteFeatureAddon(1)" style="max-width: 65px; padding: 0.15rem; font-size: 0.65rem; border-color: var(--primary-cyan-dim); color: var(--primary-cyan);">👍 <span id="vote-count-1">14</span></button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 0.35rem 0.55rem; border-radius: 6px; font-size: 0.72rem;">
+                  <span style="color: var(--text-secondary);">🤖 Buganizer Router Trigger</span>
+                  <button class="btn-sm" id="btn-vote-2" onclick="window.upvoteFeatureAddon(2)" style="max-width: 65px; padding: 0.15rem; font-size: 0.65rem; border-color: var(--primary-cyan-dim); color: var(--primary-cyan);">👍 <span id="vote-count-2">8</span></button>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,0.02); border: 1px solid var(--border-light); padding: 0.35rem 0.55rem; border-radius: 6px; font-size: 0.72rem;">
+                  <span style="color: var(--text-secondary);">📊 Google Sheets E2E Sync</span>
+                  <button class="btn-sm" id="btn-vote-3" onclick="window.upvoteFeatureAddon(3)" style="max-width: 65px; padding: 0.15rem; font-size: 0.65rem; border-color: var(--primary-cyan-dim); color: var(--primary-cyan);">👍 <span id="vote-count-3">21</span></button>
+                </div>
+              </div>
+
+              <!-- Custom Suggestion form -->
+              <div style="display: flex; flex-direction: column; gap: 0.45rem; border-top: 1px dashed var(--border-light); padding-top: 0.55rem;">
+                <input type="text" id="custom-suggestion-input" class="form-control" placeholder="Type custom feature suggestion..." style="height: 28px; font-size: 0.72rem; padding: 0.25rem;">
+                <button class="btn btn-primary-sm" onclick="window.submitCustomSuggestion()" style="font-size: 0.72rem; padding: 0.35rem; font-weight: 700; border-radius: 6px;">Submit Custom Suggestion 🚀</button>
               </div>
             </div>
           </div>
