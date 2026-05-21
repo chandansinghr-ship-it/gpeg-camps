@@ -44,6 +44,7 @@ let state = {
   dailyTasks: [],
   workspaceAssets: [],
   activeInvitations: [],
+  dryRuns: [],
 
   // Automation & Integration Hub Extensions
   chatBotMessages: [
@@ -192,6 +193,19 @@ function initState() {
   } else {
     state.activeInvitations = [];
     localStorage.setItem('gpeg_active_invitations', JSON.stringify(state.activeInvitations));
+  }
+
+  const savedDryRuns = localStorage.getItem('gpeg_dry_runs');
+  if (savedDryRuns) {
+    state.dryRuns = JSON.parse(savedDryRuns);
+  } else {
+    state.dryRuns = [
+      { id: "dry_1", name: "Taylor Chen", product: "GMP DV360 Advanced", deadline: "2026-05-24", priority: "High", lead: "Alex Rivera", status: "Pending Dry Run" },
+      { id: "dry_2", name: "Alex Rivera", product: "Search & PMax Bidding", deadline: "2026-05-28", priority: "Medium", lead: "Taylor Chen", status: "Approved 🟢" },
+      { id: "dry_3", name: "Jordan Blake", product: "GMP CM360 Foundations", deadline: "2026-06-02", priority: "High", lead: "Alex Rivera", status: "Pending Dry Run" },
+      { id: "dry_4", name: "Taylor Chen", product: "Partnership Ads MFG", deadline: "2026-06-08", priority: "Low", lead: "Jordan Blake", status: "Pending Dry Run" }
+    ];
+    localStorage.setItem('gpeg_dry_runs', JSON.stringify(state.dryRuns));
   }
 
   const savedBuganizer = localStorage.getItem('gpeg_buganizer_tickets');
@@ -3164,6 +3178,8 @@ window.switchTab = function(tabName) {
     window.renderAnalyticsCharts();
   } else if (tabName === 'daily-hub') {
     window.renderDailyActionHub();
+  } else if (tabName === 'rehearsal') {
+    window.renderDryRunRegistryList();
   }
 };
 
@@ -6692,6 +6708,81 @@ window.nudgeDailyAssociate = function(associateName) {
   // Log Manager Nudge inside Spanner audit logs ledger
   window.logAction('SUCCESS', `Manager Nudge Dispatched: Dispatched organizational task chase alert to ${associateName} for pending deliverable: "${targetTask.title.substring(0,35)}...".`);
   showToast('Nudge Dispatched ⚡', `Nudge notification sent to ${associateName} successfully!`);
+};
+
+// --- GPEG PRESENTER UPSKILLING & DRY RUN REGISTRY ---
+window.renderDryRunRegistryList = function() {
+  const bodyEl = document.getElementById('dry-run-registry-list-body');
+  if (!bodyEl) return;
+  bodyEl.innerHTML = '';
+
+  if (!state.dryRuns || state.dryRuns.length === 0) {
+    bodyEl.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">No dry-run nominations active.</td></tr>';
+    return;
+  }
+
+  state.dryRuns.forEach(dry => {
+    const isPending = dry.status === 'Pending Dry Run';
+    const statusBadge = isPending ? 'background: rgba(245, 158, 11, 0.15); color: var(--warning-amber); padding: 0.15rem 0.45rem; border-radius: 4px; font-weight:700;' :
+                                   'background: rgba(16, 185, 129, 0.15); color: var(--success-green); padding: 0.15rem 0.45rem; border-radius: 4px; font-weight:700;';
+
+    const priorityColor = dry.priority === 'High' ? 'color: var(--danger-red); font-weight:700;' :
+                          dry.priority === 'Medium' ? 'color: var(--warning-amber);' : 'color: var(--text-muted);';
+
+    // Evaluation Access check: Authorized if Admin / Organizer, or if logged-inPresenter is the nominated Lead!
+    const isEvaluator = state.activeRole === 'Admin' || state.activeRole === 'Organizer' || (state.activeRole === 'Presenter' && dry.lead === 'Taylor Chen');
+    
+    let actionHtml = `<span style="color:var(--text-muted); font-size:0.72rem;">--</span>`;
+    if (isPending) {
+      if (isEvaluator) {
+        actionHtml = `<button class="btn-sm btn-primary-sm" onclick="window.approveDryRunCertification('${dry.id}')" style="max-width:130px; font-size:0.68rem; padding:0.25rem 0.5rem; border-radius:4px; font-weight:800; background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.2); color:var(--success-green);">✓ Approve & Certify</button>`;
+      } else {
+        actionHtml = `<span style="color:var(--text-muted); font-size:0.65rem;" title="Only designated POD Lead or Organizer can certify.">🔒 Locked</span>`;
+      }
+    }
+
+    bodyEl.insertAdjacentHTML('beforeend', `
+      <tr style="border-bottom: 1px solid var(--border-light); color: var(--text-secondary); font-size:0.75rem;">
+        <td style="padding: 0.65rem 0.4rem; font-weight:700; color: var(--text-primary);">👤 ${dry.name}</td>
+        <td style="padding: 0.65rem 0.4rem;">🚀 ${dry.product}</td>
+        <td style="padding: 0.65rem 0.4rem; font-family: monospace;">📅 ${dry.deadline}</td>
+        <td style="padding: 0.65rem 0.4rem; ${priorityColor}">${dry.priority}</td>
+        <td style="padding: 0.65rem 0.4rem; font-weight:600;">🎓 ${dry.lead}</td>
+        <td style="padding: 0.65rem 0.4rem;"><span style="${statusBadge}">${dry.status}</span></td>
+        <td style="padding: 0.65rem 0.4rem; text-align: right;">${actionHtml}</td>
+      </tr>
+    `);
+  });
+};
+
+window.approveDryRunCertification = function(dryRunId) {
+  const dry = state.dryRuns.find(d => d.id === dryRunId);
+  if (!dry) return;
+
+  dry.status = "Approved 🟢";
+  localStorage.setItem('gpeg_dry_runs', JSON.stringify(state.dryRuns));
+
+  // 1. Upskill Roster: add new certified skill to presenter's profile dynamically in log
+  window.logAction('SUCCESS', `Presenter Upskilled: Presenter associate [${dry.name}] successfully approved and certified for live camps delivery in GPEG Ads product area: [${dry.product}] by POD Lead [${dry.lead}].`);
+
+  // 2. Dispatch wrap email alert keeping Management & Stakeholders in loop (CC Sarah & Shiva)
+  const mockCertEmail = {
+    id: `cert-${Math.floor(Math.random() * 90000) + 10000}`,
+    timestamp: new Date().toISOString(),
+    from: "gpeg-camps-ops@google.com",
+    to: "demo-lead@google.com",
+    cc: "demo-manager@google.com, gpeg-camps-leads@google.com",
+    bcc: "",
+    subject: `Presenter Upskilled & Certified: ${dry.name} approved for ${dry.product}`,
+    body: `Hi Management Pool,\n\nThis is to officially verify that presenter associate ${dry.name} has successfully cleared their E2E Dry Run for the Google Ads curriculum product family: ${dry.product}.\n\nEvaluation Audit:\n• Certified Product Area: ${dry.product}\n• Appended by POD Lead: ${dry.lead}\n• Stipulated Target Date: ${dry.deadline}\n• Status: APPROVED & CERTIFIED FOR LIVE CAMPS 🟢\n\nTaylor Chen has been mapped to active pool schedules in Spanner registry.\n\nBest,\nGPEG Partner Operations Team`
+  };
+  
+  // Push into outbox
+  state.outbox.unshift(mockCertEmail);
+  localStorage.setItem('gpeg_outbox', JSON.stringify(state.outbox));
+
+  showToast('Presenter Upskilled 🎓', `${dry.name} certified for ${dry.product}! Dispatching outbox alerts.`);
+  window.renderDryRunRegistryList();
 };
 
 
