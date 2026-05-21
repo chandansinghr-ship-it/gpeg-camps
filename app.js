@@ -1334,7 +1334,7 @@ window.triggerEmailNominationIngest = function() {
     bfmUplift: null,
     feedbackScore: null,
     recordingArchived: false,
-    internalShare: "shivam@google.com, rahul.gupta@google.com"
+    internalShare: "demo-presenter@google.com, demo-lead@google.com"
   };
 
   // Store inbound email in local outbox logs
@@ -5500,7 +5500,7 @@ window.createGoLinkFromUi = function() {
   logEl.style.color = 'var(--success-green)';
   
   setTimeout(() => {
-    logEl.textContent = `🚀 go/ Link successfully created! owner: chandansinghr@google.com`;
+    logEl.textContent = `🚀 go/ Link successfully created! owner: gpeg-ops@google.com`;
     showToast('🔗 go/ Link Created', `Successfully registered ${alias} -> ${target}!`);
     
     // Prepend GPEG's new go/ link to the sidebar's Resource list dynamically in real-time!
