@@ -40,6 +40,11 @@ let state = {
     customization: 'ALL'
   },
 
+  // Step 2.5: Daily Action Hub & Collaboration Workspace State
+  dailyTasks: [],
+  workspaceAssets: [],
+  activeInvitations: [],
+
   // Automation & Integration Hub Extensions
   chatBotMessages: [
     { sender: 'bot', text: 'Hi GPEG delivery team! I am your Google ChatOps @GPEG-Bot. Ask me about case status, active campaigns, or SLA warnings!' }
@@ -158,6 +163,35 @@ function initState() {
   } else {
     state.activeRole = "Presenter";
     saveState();
+  }
+
+  // Step 2.5: Daily Action Hub Seeds
+  const savedDailyTasks = localStorage.getItem('gpeg_daily_tasks');
+  if (savedDailyTasks) {
+    state.dailyTasks = JSON.parse(savedDailyTasks);
+  } else {
+    state.dailyTasks = [
+      { id: "t_d1", title: "Gmail: Sarah Jenkins has pending Discovery chase for GroupM (Case 1-4893000041135)", priority: "High", source: "Gmail Ingress", assignee: "Sarah Jenkins", completed: false, resources: [] },
+      { id: "t_d2", title: "Chat: b/38291002: S2S API Custom Variables Mapping answer sync pending for PM", priority: "High", source: "Chatbot Escalation", assignee: "pm.lead", completed: false, resources: [] },
+      { id: "t_d3", title: "System: MS Teams Recording URL missing for Publicis Case (4-9901000031200). Dispatch locked.", priority: "Medium", source: "System Policy", assignee: "Taylor Chen", completed: false, resources: [] }
+    ];
+    localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+  }
+
+  const savedAssets = localStorage.getItem('gpeg_workspace_assets');
+  if (savedAssets) {
+    state.workspaceAssets = JSON.parse(savedAssets);
+  } else {
+    state.workspaceAssets = [];
+    localStorage.setItem('gpeg_workspace_assets', JSON.stringify(state.workspaceAssets));
+  }
+
+  const savedInvites = localStorage.getItem('gpeg_active_invitations');
+  if (savedInvites) {
+    state.activeInvitations = JSON.parse(savedInvites);
+  } else {
+    state.activeInvitations = [];
+    localStorage.setItem('gpeg_active_invitations', JSON.stringify(state.activeInvitations));
   }
 
   const savedBuganizer = localStorage.getItem('gpeg_buganizer_tickets');
@@ -3128,6 +3162,8 @@ window.switchTab = function(tabName) {
     window.renderAssociatesRosterDetail();
   } else if (tabName === 'analytics') {
     window.renderAnalyticsCharts();
+  } else if (tabName === 'daily-hub') {
+    window.renderDailyActionHub();
   }
 };
 
@@ -6270,6 +6306,304 @@ window.submitCustomSuggestion = function() {
   inputEl.value = '';
   window.logAction('SUCCESS', `Suggestion Logged: Registered custom suggestion: "${suggestion}" in Spanner audit ledger.`);
   showToast('Suggestion Ingested 🚀', 'Feature request logged. Thank you for your feedback!');
+};
+
+// --- GPEG DAILY HUB & TEAM COLLABORATION CONTROLLER ---
+window.renderDailyActionHub = function() {
+  const listContainer = document.getElementById('daily-hub-task-list-container');
+  const pendingCounter = document.getElementById('daily-hub-pending-counter');
+  if (!listContainer) return;
+  listContainer.innerHTML = '';
+
+  const pending = state.dailyTasks.filter(t => !t.completed).length;
+  if (pendingCounter) pendingCounter.textContent = `${pending} pending daily actions`;
+
+  if (state.dailyTasks.length === 0) {
+    listContainer.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding: 2rem;">No tasks or reminders scheduled for today.</div>';
+    return;
+  }
+
+  state.dailyTasks.forEach(t => {
+    const priorityBadge = t.priority === 'High' ? 'background: rgba(239, 68, 68, 0.15); color: var(--danger-red); border: 1px solid rgba(239,68,68,0.25);' :
+                           t.priority === 'Medium' ? 'background: rgba(245, 158, 11, 0.15); color: var(--warning-amber); border: 1px solid rgba(245,158,11,0.25);' :
+                           'background: rgba(59, 130, 246, 0.15); color: var(--g-blue); border: 1px solid rgba(59,130,246,0.25);';
+
+    // Render compiled resources as Drive icons
+    let resourcesHtml = '';
+    if (t.resources && t.resources.length > 0) {
+      t.resources.forEach(res => {
+        const icon = res.type === 'Doc' ? '📄' : res.type === 'Sheet' ? '📊' : '✨';
+        resourcesHtml += `
+          <span style="font-size: 0.7rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); padding: 0.2rem 0.4rem; border-radius: 4px; color: var(--text-secondary); display: inline-flex; align-items: center; gap: 0.2rem;" title="Google Drive Resource Link">
+            ${icon} <a href="${res.link}" target="_blank" style="color: var(--primary-cyan); text-decoration: underline; font-weight:600;">${res.name}</a>
+          </span>
+        `;
+      });
+    } else if (!t.completed) {
+      // Show resource compiler actions
+      resourcesHtml = `
+        <span style="font-size: 0.68rem; color: var(--text-muted);">Compile:</span>
+        <button class="btn-sm" onclick="window.compileWorkspaceAsset('${t.id}', 'Sheet')" style="max-width: 65px; font-size: 0.65rem; padding: 0.15rem; background: rgba(16,185,129,0.05); border-color: rgba(16,185,129,0.2); color: var(--success-green);">📊 +Sheet</button>
+        <button class="btn-sm" onclick="window.compileWorkspaceAsset('${t.id}', 'Doc')" style="max-width: 55px; font-size: 0.65rem; padding: 0.15rem; background: rgba(59,130,246,0.05); border-color: rgba(59,130,246,0.2); color: var(--g-blue);">📄 +Doc</button>
+        <button class="btn-sm" onclick="window.compileWorkspaceAsset('${t.id}', 'Slides')" style="max-width: 65px; font-size: 0.65rem; padding: 0.15rem; background: rgba(139,92,246,0.05); border-color: rgba(139,92,246,0.2); color: var(--accent-purple);">✨ +Slides</button>
+      `;
+    }
+
+    listContainer.insertAdjacentHTML('beforeend', `
+      <div class="chart-container-box" style="padding: 1rem; border-color: ${t.completed ? 'rgba(255,255,255,0.02)' : 'var(--border-light)'}; background: ${t.completed ? 'rgba(255,255,255,0.005)' : 'rgba(255,255,255,0.01)'}; opacity: ${t.completed ? 0.65 : 1};">
+        <div style="display:flex; gap:0.75rem; align-items:flex-start;">
+          <input type="checkbox" ${t.completed ? 'checked' : ''} onchange="window.toggleDailyTaskComplete('${t.id}')" style="width: 16px; height: 16px; accent-color: var(--success-green); cursor: pointer; margin-top: 0.15rem;">
+          
+          <div style="display:flex; flex-direction:column; gap:0.5rem; flex:1;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom: 0.2rem;">
+                <span style="font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; ${priorityBadge}">${t.priority}</span>
+                <span style="font-size: 0.68rem; color: var(--text-muted);">Source: <strong>${t.source}</strong></span>
+              </div>
+              <h4 style="margin:0; font-size: 0.82rem; font-weight: 700; color: ${t.completed ? 'var(--text-muted)' : 'var(--text-primary)'}; text-decoration: ${t.completed ? 'line-through' : 'none'}; line-height:1.35;">${t.title}</h4>
+            </div>
+
+            <!-- Dynamic Workspace Compile Row -->
+            <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; padding-top: 0.25rem; border-top: 1px dashed rgba(255,255,255,0.03);" id="task-resource-row-${t.id}">
+              ${resourcesHtml}
+            </div>
+
+            <!-- Collaborative Actions Row -->
+            ${!t.completed ? `
+              <div style="display:flex; justify-content:space-between; align-items:center; border-top: 1px dashed rgba(255,255,255,0.03); padding-top: 0.45rem; margin-top:0.15rem; flex-wrap:wrap; gap:0.5rem;">
+                <div style="display:flex; align-items:center; gap:0.35rem;">
+                  <span style="font-size: 0.68rem; color: var(--text-secondary);">Assignee:</span>
+                  <span style="font-size: 0.7rem; font-weight:800; color: var(--text-primary); background: rgba(0,233,255,0.04); border: 1px solid var(--border-light); padding: 0.1rem 0.45rem; border-radius:4px;">👤 ${t.assignee || 'Unassigned'}</span>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:0.35rem;">
+                  <select onchange="window.delegateDailyTask('${t.id}', this.value)" class="form-control" style="height: 24px; font-size: 0.68rem; width: 110px; padding: 0.1rem 0.25rem; margin-bottom: 0; border-radius:4px;">
+                    <option value="">🔄 Delegate to...</option>
+                    <option value="Taylor Chen">Taylor Chen</option>
+                    <option value="Alex Rivera">Alex Rivera</option>
+                    <option value="Jordan Blake">Jordan Blake</option>
+                  </select>
+                  <button class="btn-sm" onclick="window.inviteDailyCollaboration('${t.id}')" style="max-width: 90px; font-size: 0.68rem; padding: 0.2rem 0.45rem; background: rgba(139,92,246,0.08); border-color: rgba(139,92,246,0.15); color: var(--accent-purple); font-weight:700;">👥 Collaborate</button>
+                </div>
+              </div>
+            ` : ''}
+          </div>
+        </div>
+      </div>
+    `);
+  });
+
+  // RENDER RIGHT COLUMN: COLLABORATION MATRIX
+  const inviteContainer = document.getElementById('daily-hub-assistance-list');
+  if (inviteContainer) {
+    inviteContainer.innerHTML = '';
+    if (state.activeInvitations.length === 0) {
+      inviteContainer.innerHTML = `
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-align:center; padding:1rem; background:rgba(255,255,255,0.01); border: 1px dashed var(--border-light); border-radius: 8px;">
+          No active collaboration sessions launched yet. Click "Collaborate" on any task card to get peers on board!
+        </div>
+      `;
+    } else {
+      state.activeInvitations.forEach(inv => {
+        const statusClass = inv.status.includes('Requested') ? 'color: var(--warning-amber);' : 'color: var(--success-green);';
+        inviteContainer.insertAdjacentHTML('beforeend', `
+          <div style="background: rgba(139, 92, 246, 0.02); border: 1px solid var(--border-light); padding: 0.65rem 0.85rem; border-radius: 8px; font-size: 0.75rem;">
+            <div style="display:flex; justify-content:space-between; font-weight:700; margin-bottom: 0.2rem;">
+              <span>Collaborative Peer: ${inv.peerName}</span>
+              <span style="${statusClass} font-weight:800;">${inv.status}</span>
+            </div>
+            <div style="font-size: 0.68rem; color: var(--text-secondary); line-height: 1.3;">
+              Assisting on workspace task: <strong style="color: var(--text-primary);">${inv.taskTitle.substring(0, 50)}...</strong>
+            </div>
+          </div>
+        `);
+      });
+    }
+  }
+
+  // RENDER RIGHT COLUMN: WORKSPACE ASSETS CATALOG
+  const catalogContainer = document.getElementById('daily-hub-workspace-catalog-list');
+  if (catalogContainer) {
+    catalogContainer.innerHTML = '';
+    if (state.workspaceAssets.length === 0) {
+      catalogContainer.innerHTML = `
+        <div style="font-size: 0.75rem; color: var(--text-muted); text-align:center; padding:1.5rem 1rem;">No compiled workspace assets recorded today. Use the slide/sheet buttons on task cards to compile resources instantly!</div>
+      `;
+    } else {
+      state.workspaceAssets.forEach(asset => {
+        const icon = asset.type === 'Doc' ? '📄' : asset.type === 'Sheet' ? '📊' : '✨';
+        catalogContainer.insertAdjacentHTML('beforeend', `
+          <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(255,255,255,0.01); border: 1px solid var(--border-light); padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.75rem;">
+            <span style="display:inline-flex; align-items:center; gap:0.3rem; font-weight:600; color: var(--text-primary);">${icon} ${asset.name}</span>
+            <span style="font-size:0.68rem; color: var(--text-muted);">Compiled: ${asset.timestamp}</span>
+          </div>
+        `);
+      });
+    }
+  }
+};
+
+window.addCustomDailyReminder = function() {
+  const titleEl = document.getElementById('daily-task-title');
+  const priorityEl = document.getElementById('daily-task-priority');
+  if (!titleEl) return;
+
+  const title = titleEl.value.trim();
+  const priority = priorityEl.value;
+  if (!title) {
+    alert("Please type your reminder description before submitting!");
+    return;
+  }
+
+  const newTask = {
+    id: `t_d_${Math.floor(Math.random() * 90000) + 10000}`,
+    title: `Reminder: ${title}`,
+    priority: priority,
+    source: "User Reminder",
+    assignee: state.activeRole === 'Admin' ? 'Taylor Chen' : state.activeRole,
+    completed: false,
+    resources: []
+  };
+
+  state.dailyTasks.push(newTask);
+  localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+  
+  titleEl.value = '';
+  window.logAction('SUCCESS', `Reminder Logged: Registered custom reminder: "${title}" (Priority: ${priority}).`);
+  showToast('Reminder Added 🎯', 'Custom reminder registered on daily task board.');
+  window.renderDailyActionHub();
+};
+
+window.toggleDailyTaskComplete = function(taskId) {
+  const task = state.dailyTasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  task.completed = !task.completed;
+  localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+
+  if (task.completed) {
+    window.logAction('SUCCESS', `Task Completed: User marked daily task "${task.title.substring(0,35)}..." as completed.`);
+    showToast('Task Complete ✓', 'Daily deliverable synced as completed.');
+    
+    // Auto-accrue workmate prep effort hours upon completing sync tasks!
+    if (task.title.includes('Discovery') || task.title.includes('Mapping')) {
+      const mockCamp = { id: "auto_t1", presenter: "Taylor Chen (Presenter)", agency: "Seeded Camp" };
+      window.accrueEffortHours(mockCamp, 'Pre-Camp');
+    }
+  } else {
+    window.logAction('WARNING', `Task Reopened: Daily task "${task.title.substring(0,35)}..." marked as pending.`);
+  }
+
+  window.renderDailyActionHub();
+};
+
+window.delegateDailyTask = function(taskId, ldap) {
+  if (!ldap) return;
+  const task = state.dailyTasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const oldAssignee = task.assignee;
+  task.assignee = ldap;
+  localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+
+  // Broadcast delegating Chatbot notification!
+  state.chatBotMessages.push({
+    sender: 'bot',
+    text: `🔄 *GPEG-Bot Operational Sync*: Presenter *${ldap}* has been delegated task: _"${task.title}"_ (transferred from ${oldAssignee || 'Unassigned'}).`
+  });
+  window.renderChatBotHistory();
+
+  window.logAction('SUCCESS', `Task Delegated: Transferred daily task "${task.title.substring(0,35)}..." to presenter: ${ldap}.`);
+  showToast('Task Delegated 🔄', `Task delegated to ${ldap} successfully.`);
+  window.renderDailyActionHub();
+};
+
+window.inviteDailyCollaboration = function(taskId) {
+  const task = state.dailyTasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  // Check if invitation already exists
+  const exists = state.activeInvitations.some(i => i.taskId === taskId);
+  if (exists) {
+    showToast('Active Invitation', 'A collaboration session is already requested/active for this task.');
+    return;
+  }
+
+  const invitedPeer = "Alex Rivera";
+  const newInvite = {
+    taskId: taskId,
+    taskTitle: task.title,
+    peerName: invitedPeer,
+    status: "Requested ⏳"
+  };
+
+  state.activeInvitations.push(newInvite);
+  localStorage.setItem('gpeg_active_invitations', JSON.stringify(state.activeInvitations));
+
+  // Broadcast invitation to Chat Console
+  state.chatBotMessages.push({
+    sender: 'bot',
+    text: `👥 *Collaboration Request*: Presenter *Taylor Chen* is requesting assistance on task: _"${task.title}"_.\n*${invitedPeer}* has been invited on board!`
+  });
+  window.renderChatBotHistory();
+  window.logAction('SUCCESS', `Collaboration Launched: Sent workspace collaboration request to ${invitedPeer} for task: "${task.title.substring(0,35)}...".`);
+  showToast('Invitation Sent 👥', `Assistance request sent to ${invitedPeer}.`);
+  window.renderDailyActionHub();
+
+  // Simulate Peer Accepts after 2.0s
+  setTimeout(() => {
+    const invite = state.activeInvitations.find(i => i.taskId === taskId);
+    if (invite) {
+      invite.status = 'Active Assist 🟢';
+      localStorage.setItem('gpeg_active_invitations', JSON.stringify(state.activeInvitations));
+
+      state.chatBotMessages.push({
+        sender: 'bot',
+        text: `🟢 *Collaboration Joined*: Presenter *${invitedPeer}* has accepted the invitation and joined Taylor Chen on workspace task: _"${task.title}"_!`
+      });
+      window.renderChatBotHistory();
+      window.logAction('SUCCESS', `Collaboration Active: ${invitedPeer} joined GPEG collaboration session for task: "${task.title.substring(0,35)}...".`);
+      showToast('Peer Joined 🟢', `${invitedPeer} has joined your workspace!`);
+      window.renderDailyActionHub();
+    }
+  }, 2000);
+};
+
+window.compileWorkspaceAsset = function(taskId, type) {
+  const task = state.dailyTasks.find(t => t.id === taskId);
+  if (!task) return;
+
+  const rowEl = document.getElementById(`task-resource-row-${taskId}`);
+  if (rowEl) {
+    rowEl.innerHTML = `<span style="font-size:0.7rem; color:var(--warning-amber); font-weight:700;">⏳ Compiling Google ${type}...</span>`;
+  }
+
+  // Simulate Google Slides/Docs API compiler E2E (1s delay)
+  setTimeout(() => {
+    const extension = type === 'Sheet' ? 'gsheet' : type === 'Doc' ? 'gdoc' : 'gslide';
+    const baseName = task.title.replace(/[^\w\s-]/gi, '').split(' ').slice(1, 5).join('_');
+    const assetName = `${baseName || 'Campaign_Asset'}_${Math.floor(Math.random()*9000)+1000}.${extension}`;
+    const mockLink = `https://docs.google.com/${type.toLowerCase()}s/d/mock_${Math.random().toString(36).substring(2,15)}`;
+
+    const newAsset = {
+      id: `a_${Math.floor(Math.random()*90000)+10000}`,
+      name: assetName,
+      type: type,
+      link: mockLink,
+      timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+    };
+
+    if (!task.resources) task.resources = [];
+    task.resources.push(newAsset);
+    localStorage.setItem('gpeg_daily_tasks', JSON.stringify(state.dailyTasks));
+
+    state.workspaceAssets.push(newAsset);
+    localStorage.setItem('gpeg_workspace_assets', JSON.stringify(state.workspaceAssets));
+
+    window.logAction('SUCCESS', `Workspace API Mock: Dynamic Google ${type} compiled and registered to Spanner database catalog: [${assetName}].`);
+    showToast('Asset Compiled 📊', `Google ${type} successfully generated and linked!`);
+    window.renderDailyActionHub();
+  }, 1000);
 };
 
 

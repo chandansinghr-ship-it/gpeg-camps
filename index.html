@@ -35,6 +35,12 @@
           <span class="rail-nav-label">Step 2: Active Pipeline</span>
         </button>
 
+        <!-- Step 2.5: Daily Action Hub & Collaboration -->
+        <button class="rail-nav-item" id="nav-daily-hub" onclick="switchTab('daily-hub')">
+          <span class="rail-nav-icon">🎯</span>
+          <span class="rail-nav-label">Step 2.5: Daily Action Hub</span>
+        </button>
+
         <!-- Step 3: PM Escalation Queue -->
         <button class="rail-nav-item" id="nav-pm" onclick="switchTab('pm')">
           <span class="rail-nav-icon">💬</span>
@@ -357,6 +363,86 @@
       </div>
 
     </div> <!-- closes view-dashboard -->
+
+    <!-- SECTION 1.1B: DAILY ACTION HUB & COLLABORATION WORKSPACE -->
+    <div id="view-daily-hub" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1.25rem;">
+          <h2>🎯 GPEG Daily Action Hub & Team Collaboration Workspace</h2>
+          <p>Review pending deliverables ingested from Gmail and Chats, create custom reminders, delegate operational tasks, and dynamically compile Google Workspace resources.</p>
+        </div>
+
+        <div class="sandbox-split" style="grid-template-columns: 1.6fr 1fr; gap: 2rem;">
+          <!-- Left Column: Master Task Board -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <!-- Task Creation Panel -->
+            <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.01);">
+              <h3 style="color: var(--primary-cyan); font-size: 0.9rem; margin-top:0; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.35rem;">
+                <span>➕ Ingest Custom Reminder / Action Item</span>
+              </h3>
+              <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr; gap: 0.75rem; align-items: flex-end;">
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="daily-task-title" style="font-size: 0.7rem; font-weight: 700;">Task / Reminder Title</label>
+                  <input type="text" id="daily-task-title" class="form-control" placeholder="e.g. Sync with Shivam on APAC slides pre-read..." style="height:30px; font-size:0.75rem; padding:0.35rem;">
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                  <label for="daily-task-priority" style="font-size: 0.7rem; font-weight: 700;">Priority</label>
+                  <select id="daily-task-priority" class="form-control" style="height:30px; font-size:0.75rem; padding:0.2rem;">
+                    <option value="High">🔴 High Priority</option>
+                    <option value="Medium" selected>🟡 Medium Priority</option>
+                    <option value="Low">🔵 Low Priority</option>
+                  </select>
+                </div>
+                <button class="btn btn-primary" onclick="window.addCustomDailyReminder()" style="font-size: 0.75rem; padding:0.4rem; font-weight: 700; height:30px;">Add Reminder 🚀</button>
+              </div>
+            </div>
+
+            <!-- Master Task List Board -->
+            <div class="chart-container-box" style="padding: 1.5rem; flex: 1; display:flex; flex-direction:column;">
+              <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                <h3 style="color: var(--text-primary); font-size: 0.92rem; margin:0;">📋 Daily Deliverables Checklist</h3>
+                <span style="font-size: 0.72rem; color: var(--text-muted);" id="daily-hub-pending-counter">3 pending actions</span>
+              </div>
+
+              <div id="daily-hub-task-list-container" style="display:flex; flex-direction:column; gap:0.75rem; max-height:450px; overflow-y:auto; padding-right:0.25rem;">
+                <!-- Dynamic task cards render here -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Right Column: Collaboration matrix & Workspace catalog -->
+          <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+            
+            <!-- Collaboration & Assistance board -->
+            <div class="chart-container-box" style="padding: 1.25rem;">
+              <h3 style="color: var(--accent-purple); font-size: 0.9rem; margin-top:0; margin-bottom:0.5rem;">👥 Active Collaboration & Assistance</h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.75rem;">Invite team members to assist on tasks. Assistance requests automatically broadcast to the chatbot console:</p>
+              
+              <div id="daily-hub-assistance-list" style="display:flex; flex-direction:column; gap:0.5rem;">
+                <!-- Active invitations shown here -->
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-align:center; padding:1rem; background:rgba(255,255,255,0.01); border: 1px dashed var(--border-light); border-radius: 8px;">
+                  No active collaboration sessions launched yet. Click "Collaborate" on any task card to get peers on board!
+                </div>
+              </div>
+            </div>
+
+            <!-- Generated Workspace Resources catalog -->
+            <div class="chart-container-box" style="padding: 1.25rem; flex: 1;">
+              <h3 style="color: var(--success-green); font-size: 0.9rem; margin-top:0; margin-bottom:0.5rem;">🗃️ Google Workspace Generated Assets</h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.75rem;">Compiled Google Sheets, Docs, and Slide Decks generated on-demand for daily actions:</p>
+              
+              <div id="daily-hub-workspace-catalog-list" style="display:flex; flex-direction:column; gap:0.5rem; max-height:280px; overflow-y:auto;">
+                <!-- List of compiled workspace resources -->
+                <div style="font-size: 0.75rem; color: var(--text-muted); text-align:center; padding:1.5rem 1rem;">No compiled workspace assets recorded today. Use the slide/sheet buttons on task cards to compile resources instantly!</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- SECTION 1.2: CAMPS PIPELINE KANBAN BOARD -->
     <div id="view-pipeline" class="view-section">
