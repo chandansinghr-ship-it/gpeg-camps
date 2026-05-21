@@ -288,7 +288,13 @@ async function performBackendLogin(ldap, role) {
   } catch (err) {
     console.warn('Backend authentication unavailable. Running in offline mode.', err);
   }
-  return false;
+  
+  // Offline/Static Fallback for GitHub Pages sandbox compatibility:
+  currentSessionToken = `token_${ldap}_mock`;
+  localStorage.setItem('gpeg_session_token', currentSessionToken);
+  state.activeRole = role;
+  localStorage.setItem('gpeg_role', role);
+  return true;
 }
 
 async function pushStateToServer() {
