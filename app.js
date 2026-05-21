@@ -6310,6 +6310,19 @@ window.submitCustomSuggestion = function() {
 
 // --- GPEG DAILY HUB & TEAM COLLABORATION CONTROLLER ---
 window.renderDailyActionHub = function() {
+  // 👑 Toggle Hierarchical Management & Nudge Panel for Managers
+  const mgmtPanel = document.getElementById('daily-hub-management-matrix-panel');
+  const isManager = state.activeRole === 'Admin' || state.activeRole === 'Organizer' || state.activeRole === 'Stakeholder';
+  
+  if (mgmtPanel) {
+    if (isManager) {
+      mgmtPanel.style.display = 'block';
+      window.renderManagementHierarchyGrid();
+    } else {
+      mgmtPanel.style.display = 'none';
+    }
+  }
+
   const listContainer = document.getElementById('daily-hub-task-list-container');
   const pendingCounter = document.getElementById('daily-hub-pending-counter');
   if (!listContainer) return;
@@ -6604,6 +6617,81 @@ window.compileWorkspaceAsset = function(taskId, type) {
     showToast('Asset Compiled 📊', `Google ${type} successfully generated and linked!`);
     window.renderDailyActionHub();
   }, 1000);
+};
+
+// --- HIERARCHICAL MANAGEMENT & NUDGE MATRIX CONTROLLER ---
+window.renderManagementHierarchyGrid = function() {
+  const grid = document.getElementById('management-hierarchy-grid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  const teamMembers = [
+    { name: "Taylor Chen", avatar: "👨‍💻", ldap: "Taylor Chen", role: "Lead Presenter", region: "APAC", status: "Active Rehearsing" },
+    { name: "Alex Rivera", avatar: "👩‍💻", ldap: "Alex Rivera", role: "Senior Presenter", region: "AMER", status: "Delivering Camp 3" },
+    { name: "Jordan Blake", avatar: "🧑‍💻", ldap: "Jordan Blake", role: "Associate Presenter", region: "EMEA", status: "Standby / Ready" },
+    { name: "Sarah Jenkins", avatar: "👩‍💼", ldap: "Sarah Jenkins", role: "Primary AM Portfolio", region: "APAC", status: "Meeting Client" }
+  ];
+
+  teamMembers.forEach(p => {
+    // Count active pending daily tasks for this associate E2E
+    const pendingCount = state.dailyTasks.filter(t => t.assignee && t.assignee.includes(p.name.split(' ')[0]) && !t.completed).length;
+    
+    // Pull dynamic weekly utilization status
+    const weekEndingStr = "2026-05-22";
+    const util = state.weeklyUtilization.find(u => u.name.includes(p.name.split(' ')[0]) && u.weekEnding === weekEndingStr);
+    const utilStatus = util ? util.status : 'Optimal';
+    const utilLogged = util ? util.loggedHrs : 32;
+    const utilClass = utilStatus === 'Overutilized' ? 'background: rgba(239, 68, 68, 0.12); color: var(--danger-red);' :
+                      utilStatus === 'Optimal' ? 'background: rgba(16, 185, 129, 0.12); color: var(--success-green);' :
+                      'background: rgba(245, 158, 11, 0.12); color: var(--warning-amber);';
+
+    grid.insertAdjacentHTML('beforeend', `
+      <div style="background: rgba(255,255,255,0.015); border: 1px solid var(--border-light); padding: 0.85rem; border-radius: 10px; display: flex; flex-direction: column; gap: 0.65rem; position: relative; min-width: 230px;">
+        <div style="display:flex; align-items:center; gap:0.65rem;">
+          <span style="font-size: 1.8rem; background: rgba(255,255,255,0.03); border: 1px solid var(--border-light); width: 42px; height: 42px; border-radius: 50%; display:flex; align-items:center; justify-content:center;">${p.avatar}</span>
+          <div>
+            <h4 style="margin:0; font-size: 0.85rem; font-weight: 800; color: var(--text-primary);">${p.name}</h4>
+            <span style="font-size: 0.68rem; color: var(--text-secondary);">${p.role} (${p.region})</span>
+          </div>
+        </div>
+        
+        <div style="display:flex; flex-direction:column; gap:0.35rem; border-top: 1px dashed var(--border-light); padding-top:0.55rem; font-size:0.72rem;">
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color: var(--text-muted);">Active Status:</span>
+            <span style="font-weight:600; color: var(--primary-cyan);">${p.status}</span>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color: var(--text-muted);">Utilization:</span>
+            <span style="font-weight:800; padding: 0 0.3rem; border-radius:3px; ${utilClass}">${utilStatus} (${utilLogged}h)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="color: var(--text-muted);">Pending Tasks:</span>
+            <span style="font-weight:700; color: ${pendingCount > 0 ? 'var(--warning-amber)' : 'var(--success-green)'};">${pendingCount} actions pending</span>
+          </div>
+        </div>
+
+        <button class="btn-sm btn-primary-sm" id="btn-nudge-${p.name.split(' ')[0]}" onclick="window.nudgeDailyAssociate('${p.name}')" style="width: 100%; font-size:0.68rem; padding:0.25rem; font-weight:800; border-radius:6px; margin-top:0.2rem;" ${pendingCount === 0 ? 'disabled style="opacity:0.4; cursor:not-allowed;"' : ''}>⚡ Nudge Presenter</button>
+      </div>
+    `);
+  });
+};
+
+window.nudgeDailyAssociate = function(associateName) {
+  const pendingTasks = state.dailyTasks.filter(t => t.assignee && t.assignee.includes(associateName.split(' ')[0]) && !t.completed);
+  if (pendingTasks.length === 0) return;
+
+  const targetTask = pendingTasks[0];
+
+  // Compile Nudge chat notification alert inside Chat console
+  state.chatBotMessages.push({
+    sender: 'bot',
+    text: `⚡ *Hierarchical Operations Nudge*: Manager *${state.activeRole}* has dispatched an urgent, high-priority operational chase alert to *${associateName}*!\nAction requested on pending deliverable: _"${targetTask.title}"_`
+  });
+  window.renderChatBotHistory();
+
+  // Log Manager Nudge inside Spanner audit logs ledger
+  window.logAction('SUCCESS', `Manager Nudge Dispatched: Dispatched organizational task chase alert to ${associateName} for pending deliverable: "${targetTask.title.substring(0,35)}...".`);
+  showToast('Nudge Dispatched ⚡', `Nudge notification sent to ${associateName} successfully!`);
 };
 
 

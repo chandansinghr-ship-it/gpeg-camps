@@ -376,6 +376,18 @@
           <!-- Left Column: Master Task Board -->
           <div style="display: flex; flex-direction: column; gap: 1.25rem;">
             
+            <!-- 👑 GPEG Management Reporting & Nudge Matrix (Organizer/Admin/Stakeholder Only) -->
+            <div class="chart-container-box" id="daily-hub-management-matrix-panel" style="padding: 1.25rem; border-color: var(--accent-purple); background: rgba(139,92,246,0.01); display: none;">
+              <h3 style="color: var(--accent-purple); font-size: 0.95rem; margin-top:0; margin-bottom:0.5rem; display:flex; align-items:center; gap:0.35rem; font-weight:700;">
+                <span>👑 GPEG Hierarchical Operations Control & Nudge Matrix</span>
+              </h3>
+              <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.75rem;">Executive Console: Monitor managed practitioners, evaluate active task loads, and nudge team members to check on delayed deliverables:</p>
+              
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.75rem;" id="management-hierarchy-grid">
+                <!-- Managed team cards inject here dynamically -->
+              </div>
+            </div>
+
             <!-- Task Creation Panel -->
             <div class="chart-container-box" style="padding: 1.25rem; background: rgba(255,255,255,0.01);">
               <h3 style="color: var(--primary-cyan); font-size: 0.9rem; margin-top:0; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.35rem;">
