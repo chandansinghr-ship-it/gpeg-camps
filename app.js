@@ -3051,6 +3051,12 @@ window.switchTab = function(tabName) {
     window.renderEffortLogs();
   } else if (tabName === 'dashboard') {
     window.recalculateRoiScorecards();
+  } else if (tabName === 'activity') {
+    window.renderActivityTrackerAuditLogs();
+  } else if (tabName === 'associates') {
+    window.renderAssociatesRosterDetail();
+  } else if (tabName === 'analytics') {
+    window.renderAnalyticsCharts();
   }
 };
 
@@ -5943,6 +5949,98 @@ window.accrueEffortHours = function(camp, type) {
   }
 
   window.logAction('SUCCESS', `Workmate Auto-Accrual: Automatically logged ${hours} hours effort for ${presenterName} under ${type} - ${taskName}.`);
+};
+
+// --- SYSTEM ACTIVITY LOGS AUDIT TRAIL RENDERER ---
+window.renderActivityTrackerAuditLogs = function() {
+  const listEl = document.getElementById('activity-tracker-audit-trail-list');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  if (state.logs.length === 0) {
+    listEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted); text-align: center; padding-top: 2rem;">No audit logs available.</div>';
+    return;
+  }
+
+  // Render reversed list (newest first) E2E
+  const reversedLogs = [...state.logs].reverse();
+  reversedLogs.forEach(log => {
+    const dateStr = new Date(log.timestamp).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+    const levelClass = log.level === 'SUCCESS' ? 'color: var(--success-green);' :
+                       log.level === 'WARNING' ? 'color: var(--warning-amber);' : 'color: var(--primary-cyan);';
+
+    listEl.insertAdjacentHTML('beforeend', `
+      <div style="display: flex; justify-content: space-between; font-family: monospace; font-size: 0.78rem; background: rgba(255,255,255,0.01); border: 1px solid var(--border-light); padding: 0.5rem 0.75rem; border-radius: 6px; align-items: center; gap: 1rem; margin-bottom: 0.4rem;">
+        <span style="color: var(--text-muted); min-width: 70px;">🕒 ${dateStr}</span>
+        <span style="font-weight: 800; min-width: 75px; text-transform: uppercase; ${levelClass}">[${log.level}]</span>
+        <span style="color: var(--text-secondary); flex: 1; text-align: left; word-break: break-all;">${log.message}</span>
+      </div>
+    `);
+  });
+};
+
+window.clearAuditLogsFromUi = function() {
+  state.logs = [];
+  localStorage.setItem('gpeg_logs', JSON.stringify(state.logs));
+  window.renderActivityTrackerAuditLogs();
+  showToast('Logs Purged', 'Audit log entries purged locally.');
+};
+
+// --- CAMPS BY ASSOCIATE ROSTER DETAIL RENDERER ---
+window.renderAssociatesRosterDetail = function() {
+  const container = document.getElementById('associates-roster-grid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const presenters = [
+    { name: "Taylor Chen", avatar: "👨‍💻", ldap: "taylor.chen", role: "Lead Presenter", region: "APAC", color: "#ffd700" },
+    { name: "Alex Rivera", avatar: "👩‍💻", ldap: "alex.rivera", role: "Senior Presenter", region: "AMER", color: "#c0c0c0" },
+    { name: "Jordan Blake", avatar: "🧑‍💻", ldap: "jordan.blake", role: "Presenter Associate", region: "EMEA", color: "#cd7f32" }
+  ];
+
+  presenters.forEach(p => {
+    const assigned = state.camps.filter(c => c.presenter && c.presenter.includes(p.name.split(' ')[0]));
+    const closed = assigned.filter(c => c.stage === 'closed');
+    const totalCsat = closed.reduce((sum, c) => sum + (c.feedbackScore || 0), 0);
+    const avgCsat = closed.length > 0 ? (totalCsat / closed.length).toFixed(2) : "4.50";
+    
+    // Expected weekly utilization hours logged
+    const weekEndingStr = "2026-05-22";
+    const util = state.weeklyUtilization.find(u => u.name.includes(p.name.split(' ')[0]) && u.weekEnding === weekEndingStr);
+    const loggedHrs = util ? util.loggedHrs : 0;
+    const expectedHrs = util ? util.expectedHrs : 40;
+    const utilRatio = Math.round((loggedHrs / expectedHrs) * 100);
+
+    container.insertAdjacentHTML('beforeend', `
+      <div class="chart-container-box" style="padding: 1.5rem; border-color: rgba(255,255,255,0.06); display: flex; flex-direction: column; gap: 0.85rem; position: relative;">
+        <div style="display: flex; align-items: center; gap: 0.75rem;">
+          <span style="font-size: 2.5rem; background: rgba(0,233,255,0.04); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 1px solid var(--border-light);">${p.avatar}</span>
+          <div>
+            <h3 style="margin: 0; font-size: 1.1rem; font-weight: 800; color: var(--text-primary);">${p.name}</h3>
+            <span style="font-size: 0.75rem; font-weight: 600; color: var(--primary-cyan);">${p.role} | LDAP: ${p.ldap}</span>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px dashed var(--border-light); padding-top: 0.75rem; margin-top: 0.25rem;">
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+            <span>Primary Region Scope:</span>
+            <span style="font-weight: 700; color: var(--text-primary);">${p.region} Scope</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+            <span>Active Camps Load:</span>
+            <span style="font-weight: 700; color: var(--accent-purple);">${assigned.length} sessions</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+            <span>Avg Feedback score:</span>
+            <span style="font-weight: 700; color: var(--warning-amber);">${avgCsat} / 5.00</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-secondary);">
+            <span>Weekly Utilization:</span>
+            <span style="font-weight: 700; color: var(--success-green);">${loggedHrs} / ${expectedHrs} hrs (${utilRatio}%)</span>
+          </div>
+        </div>
+      </div>
+    `);
+  });
 };
 
 

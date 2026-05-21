@@ -63,7 +63,10 @@
             <span class="rail-nav-icon">📊</span>
             <span class="rail-nav-label">Performance KPIs</span>
           </button>
-
+          <button class="rail-nav-item" id="nav-analytics" onclick="switchTab('analytics')">
+            <span class="rail-nav-icon">📈</span>
+            <span class="rail-nav-label">ROI Analytics Charts</span>
+          </button>
           <button class="rail-nav-item" id="nav-sessions" onclick="switchTab('sessions')">
             <span class="rail-nav-icon">📅</span>
             <span class="rail-nav-label">Partner Sessions</span>
@@ -887,6 +890,40 @@
         </div>
         <div class="roster-grid" id="team-roster-grid">
           <!-- Roster cards dynamically inject -->
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6B: SYSTEM ACTIVITY TRACKER LOGS -->
+    <div id="view-activity" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1rem;">
+          <h2>System Activity Tracker & Audit Logs</h2>
+          <p>Real-time auditing of security SSO logins, SLA Time Machine temporal shifts, and Webhook Connect CRM transactions.</p>
+        </div>
+        
+        <div class="chart-container-box" style="padding: 1.5rem;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 0.5rem;">
+            <h3 style="font-size: 0.9rem; color: var(--primary-cyan); font-weight: 700; margin: 0;">📄 Master Security Audit Trail</h3>
+            <button class="btn-sm" onclick="window.clearAuditLogsFromUi()" style="font-size: 0.7rem; padding: 0.2rem 0.6rem; border-radius: 4px; max-width: 150px;">Clear Local Audit Logs</button>
+          </div>
+          <div id="activity-tracker-audit-trail-list" style="display: flex; flex-direction: column; gap: 0.65rem; max-height: 450px; overflow-y: auto; padding-right: 0.25rem;">
+            <!-- Logs inject here dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 6C: CAMPS BY ASSOCIATE ROSTER DETAIL -->
+    <div id="view-associates" class="view-section">
+      <div class="sandbox-panel">
+        <div class="sandbox-header" style="border-bottom: 1px solid var(--border-light); padding-bottom: 1rem; margin-bottom: 1rem;">
+          <h2>GPEG Associate Camps Roster Detail</h2>
+          <p>Capacity and camp allocation analytics mapped per Lead Delivery Presenter.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;" id="associates-roster-grid">
+          <!-- Presenter details populate dynamically -->
         </div>
       </div>
     </div>
