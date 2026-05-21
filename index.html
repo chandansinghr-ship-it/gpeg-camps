@@ -1078,6 +1078,9 @@
               <li>Total Team capacity average is at <strong>85.6% (Optimal)</strong>.</li>
               <li>Alex is currently <strong>overutilized</strong> due to high PMax campaign volume. Recommend balancing incoming pre-camp tasks to Jordan.</li>
             </ul>
+            <div style="margin-top: 1rem; border-top: 1px dashed var(--border-light); padding-top: 0.75rem;">
+              <button class="btn btn-primary tooltip-trigger" data-tooltip="Programmatically balance task assignments. Automatically re-routes pre-camp work from overutilized presenters to underutilized ones E2E." onclick="window.balanceTeamCapacityLoad()" style="width: 100%; font-size: 0.75rem; padding: 0.4rem; font-weight: 800; border-radius: 6px;">⚖️ Balance Team Capacity Load</button>
+            </div>
           </div>
         </div>
       </div>
@@ -2310,7 +2313,12 @@
               </div>
 
               <div class="form-group">
-                <label for="rehearsal-presenter-response" style="font-size: 0.75rem; font-weight: 700;">Your Answer Delivery Rehearsal</label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                  <label for="rehearsal-presenter-response" style="font-size: 0.75rem; font-weight: 700; margin-bottom: 0;">Your Answer Delivery Rehearsal</label>
+                  <button class="btn-sm" id="rehearsal-mic-stt-btn" onclick="window.triggerRehearsalSpeechToTextSimulation()" style="max-width: 160px; font-size: 0.68rem; padding: 0.2rem 0.5rem; background: rgba(0,233,255,0.06); border-color: rgba(0,233,255,0.15); color: var(--primary-cyan); font-weight: 800; display: inline-flex; align-items: center; gap: 0.25rem; margin-bottom: 0; cursor: pointer; border-radius: 4px;">
+                    <span id="rehearsal-mic-icon">🎙️</span> <span id="rehearsal-mic-label">AI STT Voice Input</span>
+                  </button>
+                </div>
                 <textarea id="rehearsal-presenter-response" class="form-control" rows="3" style="resize: none; font-size: 0.8rem; padding: 0.5rem;" placeholder="Type your technical response here to practice handling the client Q&A..."></textarea>
               </div>
 
@@ -2976,7 +2984,10 @@
         <!-- Session Link -->
         <div class="form-group" style="grid-column: span 2; margin-bottom: 0.5rem;">
           <label>EMEA / Session Meeting Link</label>
-          <input type="text" id="kickoff-meeting-link" class="form-control" value="https://meet.google.com/gpeg-sessions-2026" style="border-radius: 4px; height: 30px; font-size: 0.75rem;">
+          <input type="text" id="kickoff-meeting-link" onkeyup="window.validateKickoffMeetingLinkPlatform()" class="form-control" value="https://meet.google.com/gpeg-sessions-2026" style="border-radius: 4px; height: 30px; font-size: 0.75rem;">
+        </div>
+        <div id="kickoff-platform-validation-warning" style="grid-column: span 2; font-size: 0.7rem; color: var(--warning-amber); font-weight: 600; display: none; margin-top: -0.25rem; margin-bottom: 0.5rem; line-height: 1.3;">
+          ⚠️ Platform Mismatch: Mapped platform is MS Teams, but the session meeting link you entered is a Google Meet URL.
         </div>
 
         <!-- Customized Slides Agenda Modules -->

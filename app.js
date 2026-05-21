@@ -6985,5 +6985,106 @@ window.launchKanbanCollaboration = function(campId) {
   }, 250);
 };
 
+// --- HEURISTIC FIX 1: PROACTIVE REGIONAL CAPACITY BALANCING ---
+window.balanceTeamCapacityLoad = function() {
+  const weekEndingStr = "2026-05-22";
+  const alexUtil = state.weeklyUtilization.find(u => u.name === 'Alex Rivera' && u.weekEnding === weekEndingStr);
+  const jordanUtil = state.weeklyUtilization.find(u => u.name === 'Jordan Blake' && u.weekEnding === weekEndingStr);
+
+  if (!alexUtil || alexUtil.status !== 'Overutilized') {
+    showToast('Capacity Balanced', 'Team bandwidth pacing is already within optimal limits.');
+    return;
+  }
+
+  // Reallocate effort hours: Shift 8 hours of task prep from Alex (overutilized) to Jordan (underutilized)!
+  alexUtil.loggedHrs = Math.max(40, alexUtil.loggedHrs - 8);
+  alexUtil.status = 'Optimal';
+
+  if (jordanUtil) {
+    jordanUtil.loggedHrs += 8;
+    if (jordanUtil.loggedHrs >= 30) jordanUtil.status = 'Optimal';
+  }
+
+  localStorage.setItem('gpeg_weekly_utilization', JSON.stringify(state.weeklyUtilization));
+
+  // Programmatically re-route pending camps allocated to Alex Rivera to Jordan Blake
+  state.camps.forEach(c => {
+    if (c.stage !== 'closed' && c.presenter && c.presenter.includes('Alex')) {
+      c.presenter = 'Jordan Blake (Presenter)';
+    }
+  });
+  localStorage.setItem('gpeg_camps', JSON.stringify(state.camps));
+
+  // Broadcast load balanced ChatOps alert!
+  state.chatBotMessages.push({
+    sender: 'bot',
+    text: `⚖️ *GPEG Operational Load Balanced*: Programmatic capacity redistribution successfully triggered. 8.0h pre-camp deliverables transferred from *Alex Rivera* to *Jordan Blake* to relieve capacity overages.`
+  });
+  window.renderChatBotHistory();
+
+  window.logAction('SUCCESS', `Load Balanced: Transferred active pre-camp loads from overutilized presenter [Alex Rivera] to [Jordan Blake] persistently.`);
+  showToast('Capacity Balanced ⚖️', 'Tasks successfully reallocated! presenters utilization synced.');
+  
+  // Redraw all elements E2E!
+  window.renderWeeklyUtilizationChart();
+  window.renderAssociatesRosterDetail();
+  if (typeof window.renderWeeklyUtilizationTable === 'function') {
+    window.renderWeeklyUtilizationTable();
+  }
+};
+
+// --- HEURISTIC FIX 2: MULTI-PLATFORM MEET/TEAMS LINK VALIDATION ---
+window.validateKickoffMeetingLinkPlatform = function() {
+  const platform = document.getElementById('kickoff-platform').value;
+  const linkEl = document.getElementById('kickoff-meeting-link');
+  const warningEl = document.getElementById('kickoff-platform-validation-warning');
+  
+  if (!linkEl || !warningEl) return;
+
+  const linkVal = linkEl.value.trim().toLowerCase();
+
+  if (platform === 'Teams' && linkVal.includes('meet.google.com')) {
+    warningEl.textContent = `⚠️ Platform Mismatch: Mapped platform is MS Teams, but you entered a Google Meet URL.`;
+    warningEl.style.display = 'block';
+  } else if (platform === 'GVC' && (linkVal.includes('teams.microsoft.com') || linkVal.includes('teams.live'))) {
+    warningEl.textContent = `⚠️ Platform Mismatch: Mapped platform is Google Meet, but you entered an MS Teams URL.`;
+    warningEl.style.display = 'block';
+  } else {
+    warningEl.style.display = 'none';
+  }
+};
+
+// --- HEURISTIC FIX 3: LIVE SPEECH-TO-TEXT (STT) SIMULATION MOCK ---
+window.triggerRehearsalSpeechToTextSimulation = function() {
+  const btn = document.getElementById('rehearsal-mic-stt-btn');
+  const label = document.getElementById('rehearsal-mic-label');
+  const textarea = document.getElementById('rehearsal-presenter-response');
+
+  if (!btn || !textarea) return;
+
+  btn.disabled = true;
+  btn.style.cursor = 'not-allowed';
+  btn.style.background = 'rgba(239,68,68,0.18)';
+  btn.style.borderColor = 'var(--danger-red)';
+  btn.style.color = 'var(--danger-red)';
+  
+  if (label) label.textContent = "Recording Pitch... (3s)";
+
+  // Simulate live STT voice feed recording E2E
+  setTimeout(() => {
+    textarea.value = `Regarding b/38291002: Custom variables mapping inside Google Marketing Platform CM360 and SA360 can be completed programmatically by pushing Server-to-Server conversion payloads, successfully securing dynamic Floodlight integrations without relying on manual client-side tagging.`;
+    
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+    btn.style.background = 'rgba(0,233,255,0.06)';
+    btn.style.borderColor = 'rgba(0,233,255,0.15)';
+    btn.style.color = 'var(--primary-cyan)';
+    if (label) label.textContent = "AI STT Voice Input";
+
+    window.logAction('SUCCESS', `AI STT Voice Synthesis: Simulated voice pitch input programmatically transcribed into response text area.`);
+    showToast('Vocal Pitch Recorded 🎙️', 'Speech feed successfully transcribed by GPEG AI engine.');
+  }, 2500);
+};
+
 
 
