@@ -821,7 +821,7 @@ function renderSidebarSlaList() {
           <div class="sidebar-item-title">${camp.agency} (${camp.product})</div>
           <div class="sidebar-item-meta">
             <span>Discovery Pending</span>
-            <span class="alert-timer" style="color: ${risk.color};">⏱️ ${camp.slaDaysRemaining}d left <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.06); margin-left: 0.25rem;" title="Simulated ML Breach Risk Prediction">Risk: ${risk.score}%</span></span>
+            <span class="alert-timer" style="color: ${risk.color};">⏱️ ${camp.slaDaysRemaining}d left <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.06); margin-left: 0.25rem;" title="Simulated Machine Learning Breach Risk: Dynamically calculated based on elapsed time since case nomination, designated presenter workloads, and historical regional latency.">Risk: ${risk.score}%</span></span>
           </div>
         </div>
       `);
@@ -834,7 +834,7 @@ function renderSidebarSlaList() {
           <div class="sidebar-item-title">${camp.agency} (Post-Camp)</div>
           <div class="sidebar-item-meta">
             <span>${hasUnresolved ? 'Escalated Q&A Pending' : 'Ready for Follow-up'}</span>
-            <span class="alert-timer" style="color: ${risk.color};">⏱️ ${camp.slaDaysRemaining}d left <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.06); margin-left: 0.25rem;" title="Simulated ML Breach Risk Prediction">Risk: ${risk.score}%</span></span>
+            <span class="alert-timer" style="color: ${risk.color};">⏱️ ${camp.slaDaysRemaining}d left <span style="font-size: 0.65rem; font-weight: 700; padding: 0.05rem 0.25rem; border-radius: 4px; background: rgba(255,255,255,0.06); margin-left: 0.25rem;" title="Simulated Machine Learning Breach Risk: Dynamically calculated based on elapsed time since case nomination, designated presenter workloads, and historical regional latency.">Risk: ${risk.score}%</span></span>
           </div>
         </div>
       `);
@@ -3194,6 +3194,11 @@ window.switchTab = function(tabName) {
   const dateStr = new Date(state.simulatedTime).toISOString().split('T')[0];
   const dateEl = document.getElementById('sim-date-display');
   if (dateEl) dateEl.textContent = dateStr;
+
+  const footerDateEl = document.getElementById('footer-freshness-timestamp');
+  if (footerDateEl) {
+    footerDateEl.textContent = `Verified Real-Time Sync (Sim Date: ${new Date(state.simulatedTime).toLocaleDateString('en-US', {month: 'short', day: 'numeric', year: 'numeric'})})`;
+  }
 
   oldSwitchTab(tabName);
 
@@ -7084,6 +7089,50 @@ window.triggerRehearsalSpeechToTextSimulation = function() {
     window.logAction('SUCCESS', `AI STT Voice Synthesis: Simulated voice pitch input programmatically transcribed into response text area.`);
     showToast('Vocal Pitch Recorded 🎙️', 'Speech feed successfully transcribed by GPEG AI engine.');
   }, 2500);
+};
+
+// --- REDESIGN ROADMAP: DYNAMIC SLIDES EXPORTER & METADATA FRESHENER ---
+window.exportAnalyticsToGoogleSlides = function() {
+  const btn = document.getElementById('btn-export-slides-analytics');
+  const label = document.getElementById('export-slides-label');
+  const icon = document.getElementById('export-slides-icon');
+
+  if (!btn) return;
+
+  btn.disabled = true;
+  btn.style.cursor = 'not-allowed';
+  if (label) label.textContent = "Compiling ROI Slide Deck E2E...";
+  if (icon) icon.textContent = "⏳";
+
+  // Simulate E2E compile (1.5s delay)
+  setTimeout(() => {
+    const selectedRegion = state.activeRegionAnalytics || 'GLOBAL';
+    const mockDeckLink = `https://docs.google.com/presentation/d/mock_roi_slides_export_${Math.random().toString(36).substring(2,14)}`;
+
+    const mockExportMail = {
+      id: `slides-exp-${Math.floor(Math.random() * 90000) + 10000}`,
+      timestamp: new Date().toISOString(),
+      from: "gpeg-data-hub@google.com",
+      to: "demo-lead@google.com",
+      cc: "demo-manager@google.com, gpeg-camps-leads@google.com",
+      bcc: "",
+      subject: `EXPORT COMPLETE: GPEG ROI Performance Presentation [${selectedRegion}]`,
+      body: `Hi Leadership Pool,\n\nThe GPEG ROI Performance & campaign volume deck has been successfully compiled E2E by presenter Taylor Chen.\n\n📊 Operational Scope Summarized:\n• Current Region Filter: ${selectedRegion}\n• Metric A (Total BFM revenue Uplift): 15.4%\n• Metric B (Average CSAT score): 4.65 / 5.00\n• Decoupled DB Platform: SQLite Spanner Webhook Ingress\n\n📁 Compiled Slides Link (Google Drive Shared Folder): \n${mockDeckLink}\n\nBest,\nGPEG Enablement & Data Engineering`
+    };
+
+    // Push into outbox gateway persistently
+    state.outbox.unshift(mockExportMail);
+    localStorage.setItem('gpeg_outbox', JSON.stringify(state.outbox));
+
+    // Log transaction audit
+    window.logAction('SUCCESS', `Analytics Google Slides: Programmatically compiled ROI metrics presentation. Google Slides Mock: [${mockDeckLink}].`);
+    showToast('ROI Deck Compiled ✨', 'Google Slides successfully compiled and draft email sent!');
+
+    btn.disabled = false;
+    btn.style.cursor = 'pointer';
+    if (label) label.textContent = "Export to Google Slides";
+    if (icon) icon.textContent = "✨";
+  }, 1500);
 };
 
 

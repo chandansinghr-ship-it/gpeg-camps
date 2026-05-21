@@ -1645,11 +1645,17 @@
             <h2>Operational KPI & Performance Analytics</h2>
             <p>Live performance dashboard summarizing regional BFM adoption uplift and curriculum allocations.</p>
           </div>
-          <!-- Dynamic Interactive Drill-down filter badge -->
-          <div id="analytics-drilldown-badge-container" style="display: none; align-items: center; gap: 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 0.35rem 0.75rem; border-radius: 20px;">
-            <span style="color: var(--success-green); font-weight: 600;">Interactive Drill-down:</span>
-            <span id="analytics-drilldown-region" style="background: var(--success-green); color: var(--bg-darker); padding: 0.15rem 0.55rem; border-radius: 12px; font-weight: bold;">EMEA</span>
-            <a href="javascript:void(0)" onclick="window.clearRegionAnalyticsFilter()" style="color: var(--text-secondary); text-decoration: none; font-weight: bold; margin-left: 0.25rem; font-size: 0.95rem; transition: color 0.2s;" onmouseover="this.style.color='var(--danger-red)'" onmouseout="this.style.color='var(--text-secondary)'" title="Clear Filter">✕</a>
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom:0.5rem;">
+            <button class="btn btn-primary tooltip-trigger" id="btn-export-slides-analytics" data-tooltip="Compiles current regional ROI filters, BFM uplifts, and curriculum allocations directly into a ready-to-present Google Slides package." onclick="window.exportAnalyticsToGoogleSlides()" style="font-size: 0.72rem; padding: 0.35rem 0.75rem; font-weight: 800; border-radius: 4px; height: 30px; display: inline-flex; align-items: center; gap: 0.25rem; cursor: pointer; background: linear-gradient(135deg, var(--accent-purple), var(--primary-cyan)); border: 1px solid rgba(255,255,255,0.15); color: #fff; transition: all 0.3s ease;">
+              <span id="export-slides-icon">✨</span> <span id="export-slides-label">Export to Google Slides</span>
+            </button>
+
+            <!-- Dynamic Interactive Drill-down filter badge -->
+            <div id="analytics-drilldown-badge-container" style="display: none; align-items: center; gap: 0.5rem; font-size: 0.8rem; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); padding: 0.35rem 0.75rem; border-radius: 20px; height: 30px; box-sizing: border-box;">
+              <span style="color: var(--success-green); font-weight: 600; font-size: 0.72rem;">Drill-down:</span>
+              <span id="analytics-drilldown-region" style="background: var(--success-green); color: var(--bg-darker); padding: 0.1rem 0.5rem; border-radius: 12px; font-weight: bold; font-size:0.68rem;">EMEA</span>
+              <a href="javascript:void(0)" onclick="window.clearRegionAnalyticsFilter()" style="color: var(--text-secondary); text-decoration: none; font-weight: bold; margin-left: 0.15rem; font-size: 0.85rem; transition: color 0.2s;" onmouseover="this.style.color='var(--danger-red)'" onmouseout="this.style.color='var(--text-secondary)'" title="Clear Filter">✕</a>
+            </div>
           </div>
         </div>
         <div class="analytics-split">
@@ -3332,6 +3338,20 @@
     <span style="font-size: 1.15rem; filter: drop-shadow(0 0 3px var(--primary-cyan));">✨</span>
     <div id="tour-btn-tooltip" style="position: absolute; bottom: 3rem; right: 0; background: #000; color: #fff; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 0.25rem 0.55rem; border-radius: 4px; border: 1px solid var(--border-light); display: none; white-space: nowrap; pointer-events: none; letter-spacing: 0.5px;">Interactive Tour</div>
   </div>
+
+  <!-- 🕒 Centralized Data Provenance & Operational Freshness Footer (Principle #3) -->
+  <footer style="margin: 2rem auto 1.5rem auto; max-width: 1400px; padding: 1rem; border-top: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; font-size: 0.72rem; color: var(--text-muted); flex-wrap: wrap; gap: 1rem; width: 100%; box-sizing: border-box;">
+    <div style="display: flex; align-items: center; gap: 0.35rem;">
+      <span style="width: 6px; height: 6px; background: var(--success-green); border-radius: 50%; box-shadow: 0 0 6px var(--success-green); display: inline-block;"></span>
+      <span>Data Freshness: <strong id="footer-freshness-timestamp" style="color: var(--text-secondary);">Verified Real-Time Sync (Sim Date: May 18, 2026)</strong></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span>📡 Ingest Feeds: <strong style="color: var(--text-secondary);">Cases Connect CRM Webhook | Inbound Gmail Parser</strong></span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 0.5rem;">
+      <span>✉️ Operations Support: <a href="mailto:gpeg-camps-ops@google.com" style="color: var(--primary-cyan); text-decoration: underline;">gpeg-camps-ops@google.com</a></span>
+    </div>
+  </footer>
 
   <!-- Core Business Logic Module -->
   <script type="module" src="app.js"></script>
