@@ -2521,11 +2521,29 @@ body.light-theme {
   flex-shrink: 0;
   transition: width 0.22s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-x: hidden;
+  overflow-y: auto; /* Force outer scrolling for narrow laptop screen heights */
 }
+
 
 .google-nav-rail.collapsed {
   width: 72px;
 }
+
+/* Thin custom scrollbar for the outer sidebar */
+.google-nav-rail::-webkit-scrollbar {
+  width: 4px;
+}
+.google-nav-rail::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.02);
+}
+.google-nav-rail::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+}
+.google-nav-rail::-webkit-scrollbar-thumb:hover {
+  background: var(--g-blue);
+}
+
 
 
 .rail-header {
