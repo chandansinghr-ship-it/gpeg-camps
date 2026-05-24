@@ -749,7 +749,22 @@ function renderDashboard() {
   const avgBfmEl = document.getElementById('metric-bfm-average');
   if (closedCampsCount > 0) {
     avgBfmEl.textContent = `${(totalBfmUplift / closedCampsCount).toFixed(1)}%`;
-  } else {
+  }
+
+  // ⚡ PHASE 2: 1ST-PARTY GOOGLE TAG GATEWAY (GTG) LIVE METRIC CALCULATOR
+  const gtgEl = document.getElementById('metric-gtg-attainment');
+  if (gtgEl) {
+    const closedCamps = state.camps.filter(c => c.stage === 'closed');
+    const closedCount = closedCamps.length;
+    if (closedCount > 0) {
+      const gtgArchivedCount = closedCamps.filter(c => c.recordingArchived).length;
+      const gtgPct = Math.round((gtgArchivedCount / closedCount) * 100);
+      gtgEl.textContent = `${gtgPct}%`;
+    } else {
+      gtgEl.textContent = '0%';
+    }
+  }
+ else {
     avgBfmEl.textContent = '0%';
   }
 
@@ -1281,11 +1296,20 @@ window.submitAgencyDiscovery = function(caseId) {
     topics: checkedTopics,
     customModules: (camp.discoveryData && camp.discoveryData.customModules) ? camp.discoveryData.customModules : []
   };
-  // Trigger customized deck adaptation
-  camp.deckType = 'Customized Deck';
-  camp.status = 'Discovery Received';
+  
+  // ⚡ PHASE 2: "DHANU AI" AUTOMATED FEEDBACK PROCESSOR INGRESS HOOK
+  if (typeof window.dhanuAiFeedbackProcessor === 'function' && challenges) {
+    const aiResponse = window.dhanuAiFeedbackProcessor(caseId, challenges);
+    if (aiResponse && camp.discoveryData) {
+      camp.discoveryData.customModules = [aiResponse.recommendedModule];
+    }
+  } else {
+    camp.deckType = 'Customized Deck';
+    camp.status = 'Discovery Received';
+  }
   
   saveState();
+
 
   showToast('Agency Portal Submit', `Discovery responses saved for ${camp.agency}. Deck auto-customized.`);
   
