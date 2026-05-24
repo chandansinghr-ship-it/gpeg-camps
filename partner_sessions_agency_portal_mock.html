@@ -1,0 +1,957 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GPEG Navigation Utilities - Partner Sessions & Agency Portal</title>
+    <!-- Tailwind CSS CDN for modern and rapid dashboard layout building -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons for high-quality dashboard iconography -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for sleeker UI */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- Top Premium Navigation Bar -->
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-indigo-600 rounded-lg text-white">
+                <i data-lucide="layout-dashboard" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight">GPEG Camps Command Center</h1>
+                <p class="text-xs text-slate-400">Navigation Utility & Interactive Prototyping Module</p>
+            </div>
+        </div>
+        
+        <!-- Live System Date and Persona State -->
+        <div class="flex items-center gap-4 text-xs">
+            <div class="bg-slate-850 px-3 py-1.5 rounded-md border border-slate-800 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="text-slate-300 font-medium">Simulated System Date: May 18, 2026</span>
+            </div>
+            <div class="bg-indigo-950/50 text-indigo-400 px-3 py-1.5 rounded-md border border-indigo-900/50">
+                <span class="font-semibold">Active Persona:</span> Global Portal Coordinator
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <div class="flex flex-1 overflow-hidden">
+        
+        <!-- Sidebar Navigation Panel (Highlighting Populated Views) -->
+        <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between shrink-0">
+            <div class="p-4 flex flex-col gap-6">
+                <!-- Group 1: Performance KPI Analytics -->
+                <div>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500 block mb-3">Performance KPI Analytics</span>
+                    <nav class="flex flex-col gap-1">
+                        <button onclick="switchTab('dashboard-overview')" id="nav-dashboard-overview" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                            <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                            <span>Performance KPIs</span>
+                        </button>
+                        <button onclick="switchTab('partner-sessions')" id="nav-partner-sessions" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-100 bg-indigo-600/10 border-l-2 border-indigo-500">
+                            <i data-lucide="calendar" class="w-4 h-4 text-indigo-400"></i>
+                            <div class="flex items-center justify-between flex-1">
+                                <span class="font-semibold text-indigo-200">Partner Sessions</span>
+                                <span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Populated</span>
+                            </div>
+                        </button>
+                    </nav>
+                </div>
+
+                <!-- Group 2: Resources & Roster -->
+                <div>
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-slate-500 block mb-3">Resources & Roster</span>
+                    <nav class="flex flex-col gap-1">
+                        <button onclick="switchTab('agency-portal')" id="nav-agency-portal" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-slate-100">
+                            <i data-lucide="users" class="w-4 h-4 text-slate-400"></i>
+                            <div class="flex items-center justify-between flex-1">
+                                <span class="text-slate-300">Agency Portal</span>
+                                <span class="bg-indigo-500/20 text-indigo-300 text-[10px] px-1.5 py-0.5 rounded-full font-bold">Populated</span>
+                            </div>
+                        </button>
+                        <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 cursor-not-allowed opacity-50">
+                            <i data-lucide="folder-open" class="w-4 h-4"></i>
+                            <span>Resource Repository</span>
+                        </button>
+                        <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 cursor-not-allowed opacity-50">
+                            <i data-lucide="help-circle" class="w-4 h-4"></i>
+                            <span>Help & Onboarding</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Footer Meta-Logs Inside Sidebar -->
+            <div class="p-4 border-t border-slate-800 bg-slate-955/50">
+                <div class="flex items-center justify-between text-[11px] text-slate-500 mb-1">
+                    <span>Database Status</span>
+                    <span class="text-emerald-400 font-medium">Cloud Spanner E2E Connected</span>
+                </div>
+                <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-emerald-500 h-full w-full"></div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Dynamic Content Workspace -->
+        <main class="flex-1 bg-slate-900 p-8 overflow-y-auto">
+
+            <!-- TAB 1: OVERVIEW & INTEGRATION CAPABILITY -->
+            <section id="tab-dashboard-overview" class="hidden flex flex-col gap-6">
+                <div class="flex flex-col gap-2">
+                    <div class="text-xs font-semibold text-indigo-400 tracking-wider uppercase">GPEG Camps Unified Solution Map</div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white">Interactive Utility Demonstration</h2>
+                    <p class="text-sm text-slate-400 max-w-3xl">
+                        This specialized view populates the previously empty navigation links to demonstrate their dynamic business intelligence and collaborative capabilities. Click on <strong>Partner Sessions</strong> or the <strong>Agency Portal</strong> in the sidebar to review the simulated production workflows.
+                    </p>
+                </div>
+
+                <!-- Feature High-Value Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 bg-indigo-600/15 text-indigo-400 rounded-lg">
+                                <i data-lucide="calendar-range" class="w-6 h-6"></i>
+                            </div>
+                            <span class="bg-indigo-500/20 text-indigo-300 text-xs px-2.5 py-1 rounded-full font-semibold">Active Module</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">📅 Partner Sessions Console</h3>
+                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+                            Serves as an operational cockpit for GPEG team organizers, presenting scheduled training dates, attendee statistics, real-time Meet/Teams ingestion logs, and active pre-camp discovery survey track completion lists.
+                        </p>
+                        <button onclick="switchTab('partner-sessions')" class="text-sm text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1.5 group">
+                            <span>Launch Partner Sessions</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 p-6 rounded-xl border border-slate-800 hover:border-indigo-500/50 transition duration-300">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="p-3 bg-emerald-600/15 text-emerald-400 rounded-lg">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <span class="bg-emerald-500/20 text-emerald-300 text-xs px-2.5 py-1 rounded-full font-semibold">Secure Sandbox Gateway</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-white mb-2">👥 Agency Portal Workspace</h3>
+                        <p class="text-sm text-slate-400 mb-4 leading-relaxed">
+                            Simulates the external-facing client environment. By providing a valid secure session token, partner agencies submit discovery requirements, access curriculum slides, and interact with the live Q&A console.
+                        </p>
+                        <button onclick="switchTab('agency-portal')" class="text-sm text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1.5 group">
+                            <span>Open Agency Portal</span>
+                            <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Multi-Axis Mathematical KPI Overview -->
+                <div class="bg-slate-950 p-6 rounded-xl border border-slate-800">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Core Financial Alignment Targets</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="border-r border-slate-800 last:border-0 pr-4">
+                            <div class="text-xs text-slate-500 mb-1">Target Annual Recurring Revenue (ARR)</div>
+                            <div class="text-3xl font-extrabold text-white">$250.0M</div>
+                            <div class="text-xs text-slate-400 mt-1">GPEG global portfolio growth benchmark</div>
+                        </div>
+                        <div class="border-r border-slate-800 last:border-0 pr-4">
+                            <div class="text-xs text-slate-500 mb-1">Current Active ARR Touched</div>
+                            <div class="text-3xl font-extrabold text-indigo-400">$210.0M</div>
+                            <div class="text-xs text-emerald-400 mt-1 flex items-center gap-1 font-semibold">
+                                <i data-lucide="trending-up" class="w-3 h-3"></i> 84% target achievement
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-slate-500 mb-1">Current Target Deficit Gap</div>
+                            <div class="text-3xl font-extrabold text-rose-400">$40.0M</div>
+                            <div class="text-xs text-slate-400 mt-1">Requires active camp-driven product uplifts</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: PARTNER SESSIONS CONSOLE -->
+            <section id="tab-partner-sessions" class="flex flex-col gap-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="flex flex-col gap-1">
+                        <div class="text-xs font-semibold text-indigo-400 tracking-wider uppercase">Administrative Cockpit</div>
+                        <h2 class="text-2xl font-bold tracking-tight text-white">📅 GPEG Partner Sessions Master Registry</h2>
+                        <p class="text-sm text-slate-400">Track scheduled training modules, pre-camp checklists, and live workshop telemetries.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 py-2 rounded-lg flex items-center gap-1.5 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i> Add New Session Record
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters Strip -->
+                <div class="bg-slate-955 p-4 rounded-xl border border-slate-800 flex flex-wrap gap-4 items-center">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="filter" class="w-4 h-4 text-slate-500"></i>
+                        <span class="text-xs text-slate-400 font-semibold uppercase">Filters:</span>
+                    </div>
+                    <select id="filter-region" class="bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+                        <option value="all">All Regions</option>
+                        <option value="EMEA">EMEA Region</option>
+                        <option value="APAC">APAC Region</option>
+                        <option value="AMER">AMER Region</option>
+                    </select>
+                    <select id="filter-platform" class="bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-300 px-3 py-1.5 focus:border-indigo-500 focus:outline-none">
+                        <option value="all">All Platforms</option>
+                        <option value="GVC">Google Meet (GVC)</option>
+                        <option value="Teams">MS Teams</option>
+                    </select>
+                </div>
+
+                <!-- Session Master Table Grid -->
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+                    <!-- Session Table List -->
+                    <div class="bg-slate-950 rounded-xl border border-slate-800 overflow-hidden xl:col-span-2">
+                        <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-955">
+                            <h3 class="text-xs uppercase font-bold tracking-wider text-slate-400">Scheduled Partner Sessions</h3>
+                            <span class="text-xs text-slate-500">Click row to display telemetry metrics & logistics detail</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-900/50 text-slate-400 uppercase text-[10px] font-bold tracking-wider border-b border-slate-800">
+                                        <th class="py-3 px-4">Case ID</th>
+                                        <th class="py-3 px-4">Agency Parent</th>
+                                        <th class="py-3 px-4">Curriculum / Topic</th>
+                                        <th class="py-3 px-4 text-center">Platform</th>
+                                        <th class="py-3 px-4">Date & Time</th>
+                                        <th class="py-3 px-4">SLA Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-800/40 text-xs">
+                                    <tr onclick="showSessionDetail('1-4893000041135')" class="hover:bg-indigo-650/10 cursor-pointer transition select-row active-session" id="row-1-4893000041135">
+                                        <td class="py-4 px-4 font-mono text-indigo-400 font-semibold">1-4893000041135</td>
+                                        <td class="py-4 px-4 font-medium text-white">Starcom Global</td>
+                                        <td class="py-4 px-4">101-PMax Best Practices</td>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Google Meet</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-400">May 31, 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-indigo-500/10 text-indigo-400 border border-indigo-900 px-2 py-0.5 rounded text-[10px] font-medium">Awaiting Discovery</span>
+                                        </td>
+                                    </tr>
+                                    <tr onclick="showSessionDetail('2-9828000040100')" class="hover:bg-indigo-650/10 cursor-pointer transition select-row" id="row-2-9828000040100">
+                                        <td class="py-4 px-4 font-mono text-indigo-400 font-semibold">2-9828000040100</td>
+                                        <td class="py-4 px-4 font-medium text-white">Omnicom Group</td>
+                                        <td class="py-4 px-4">101-PMax Best Practices</td>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Google Meet</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-400">May 31, 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-emerald-500/10 text-emerald-400 border border-emerald-900 px-2 py-0.5 rounded text-[10px] font-medium">Discovery Received</span>
+                                        </td>
+                                    </tr>
+                                    <tr onclick="showSessionDetail('3-7721000010200')" class="hover:bg-indigo-650/10 cursor-pointer transition select-row" id="row-3-7721000010200">
+                                        <td class="py-4 px-4 font-mono text-indigo-400 font-semibold">3-7721000010200</td>
+                                        <td class="py-4 px-4 font-medium text-white">Dentsu Aegis</td>
+                                        <td class="py-4 px-4">KPI Camp: Search & PMax</td>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="bg-blue-900/40 text-blue-300 px-2 py-0.5 rounded text-[10px]">MS Teams</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-400">May 18, 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-amber-500/10 text-amber-400 border border-amber-900 px-2 py-0.5 rounded text-[10px] font-medium">In-Camp Live</span>
+                                        </td>
+                                    </tr>
+                                    <tr onclick="showSessionDetail('4-9901000031200')" class="hover:bg-indigo-650/10 cursor-pointer transition select-row" id="row-4-9901000031200">
+                                        <td class="py-4 px-4 font-mono text-indigo-400 font-semibold">4-9901000031200</td>
+                                        <td class="py-4 px-4 font-medium text-white">Publicis Groupe</td>
+                                        <td class="py-4 px-4">Partnership Ads Training</td>
+                                        <td class="py-4 px-4 text-center">
+                                            <span class="bg-slate-800 text-slate-300 px-2 py-0.5 rounded text-[10px]">Google Meet</span>
+                                        </td>
+                                        <td class="py-4 px-4 text-slate-400">May 17, 2026</td>
+                                        <td class="py-4 px-4">
+                                            <span class="bg-rose-500/10 text-rose-400 border border-rose-955 px-2 py-0.5 rounded text-[10px] font-medium">SLA Escalated (PM)</span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Side Details / Telemetry Panel -->
+                    <div id="session-details-pane" class="bg-slate-950 rounded-xl border border-slate-800 p-6 flex flex-col gap-6">
+                        <div class="border-b border-slate-800 pb-4">
+                            <div class="text-[10px] uppercase font-bold text-slate-500 tracking-wider mb-1">Session Detail Insights</div>
+                            <h3 id="detail-agency-name" class="text-lg font-bold text-white">Starcom Global</h3>
+                            <span id="detail-case-id" class="text-xs font-mono text-indigo-400">Case ID: 1-4893000041135</span>
+                        </div>
+
+                        <!-- Telemetry Grid -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-800/80">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Meeting Host</span>
+                                <div id="detail-presenter" class="text-xs font-semibold text-slate-200 mt-0.5">Jordan Blake</div>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-800/80">
+                                <span class="text-[10px] text-slate-500 uppercase font-semibold">Scheduled Date</span>
+                                <div id="detail-planned-date" class="text-xs font-semibold text-slate-200 mt-0.5">May 31, 2026</div>
+                            </div>
+                        </div>
+
+                        <!-- Platform-Specific Warning Box -->
+                        <div id="detail-teams-warning" class="hidden bg-rose-950/20 border border-rose-900/50 p-3.5 rounded-lg flex items-start gap-3">
+                            <i data-lucide="alert-triangle" class="w-4 h-4 text-rose-400 shrink-0 mt-0.5"></i>
+                            <p class="text-[11px] text-rose-300 leading-relaxed">
+                                <strong>MS Teams Verification Rule Active:</strong> Because this is an external Microsoft Teams session, the presenter cannot release follow-up materials or start the 30-day SLA tracker until the attendee-uploaded Teams Recording URL is ingested and validated.
+                            </p>
+                        </div>
+
+                        <!-- Pre-Camp Checklist Progress UI -->
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Pre-Camp Checklist Status</span>
+                            <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-850">
+                                <div id="checklist-discovery-bullet" class="w-3.5 h-3.5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white font-bold shrink-0"></div>
+                                <div class="flex-1">
+                                    <div class="text-xs font-semibold text-slate-200">Discovery Survey Link Status</div>
+                                    <div id="checklist-discovery-desc" class="text-[10px] text-slate-500">Waiting on Agency response in Sandbox</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-slate-850">
+                                <div class="w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-bold shrink-0">
+                                    <i data-lucide="check" class="w-2.5 h-2.5"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-xs font-semibold text-slate-200">GVC Meeting Invite Coordinates</div>
+                                    <div class="text-[10px] text-emerald-400 font-mono">https://meet.google.com/gpeg-sessions-2026</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Live Telemetry Integration Logs Ingestion -->
+                        <div class="flex flex-col gap-2">
+                            <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Meet/Teams Inbound Telemetry Ingestion</span>
+                            <div class="bg-slate-900 p-4 rounded-lg border border-slate-850 text-xs flex flex-col gap-2 font-mono">
+                                <div class="flex justify-between items-center text-[10px] text-slate-400">
+                                    <span>Stream Ingestion Status:</span>
+                                    <span id="telemetry-pill" class="text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded uppercase font-bold text-[9px]">Inactive</span>
+                                </div>
+                                <p id="telemetry-console-msg" class="text-[10px] text-slate-500 italic">"Waiting for workshop live-session event triggers."</p>
+                            </div>
+                        </div>
+
+                        <!-- Action Panel -->
+                        <div class="pt-4 border-t border-slate-800 flex gap-2">
+                            <button onclick="simulateNudgeAM()" class="flex-1 bg-indigo-600/10 border border-indigo-900 hover:bg-indigo-600 hover:text-white transition text-indigo-400 text-xs font-semibold py-2 rounded-lg flex items-center justify-center gap-1.5">
+                                <i data-lucide="bell" class="w-4 h-4"></i> Nudge Agency AM
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: SECURE AGENCY PORTAL SANDBOX -->
+            <section id="tab-agency-portal" class="hidden flex flex-col gap-6">
+                <div class="flex flex-col gap-1">
+                    <div class="text-xs font-semibold text-emerald-400 tracking-wider uppercase">Secure Partner Hub</div>
+                    <h2 class="text-2xl font-bold tracking-tight text-white">👥 GPEG Agency Portal Sandbox</h2>
+                    <p class="text-sm text-slate-400">External-facing workspace securely loaded by agencies during kickoff. Verify token to access your session workspace.</p>
+                </div>
+
+                <!-- Session Access Secure Gate -->
+                <div id="portal-secure-gate" class="bg-slate-955 rounded-xl border border-slate-800 max-w-2xl mx-auto p-8 flex flex-col gap-6">
+                    <div class="flex flex-col items-center text-center gap-2">
+                        <div class="p-4 bg-emerald-500/10 text-emerald-400 rounded-full mb-2">
+                            <i data-lucide="shield-alert" class="w-12 h-12"></i>
+                        </div>
+                        <h3 class="text-lg font-bold text-white">SECURE SESSION ACCESS GATEWAY</h3>
+                        <p class="text-xs text-slate-400 max-w-md">Verify your unique secure session Case ID token to load your customized Discovery Form, Q&A escalation hub, or feedback modules.</p>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                        <label class="text-xs text-slate-400 font-semibold uppercase">Secure Case ID Token</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="portal-token-input" placeholder="Enter secure case ID (e.g. 2-9828000040100)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg text-sm text-slate-100 px-4 py-3 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono">
+                            <button onclick="verifySecureToken()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-6 rounded-lg transition uppercase tracking-wider">Verify Token</button>
+                        </div>
+                        <span id="secure-gate-error" class="text-xs text-rose-400 hidden mt-1 flex items-center gap-1">
+                            <i data-lucide="x-circle" class="w-3.5 h-3.5"></i> Access Denied: Entered token does not match any active GPEG Camp.
+                        </span>
+                    </div>
+
+                    <!-- Heuristic Token Helper -->
+                    <div class="bg-slate-900 p-4 rounded-lg border border-slate-850/80">
+                        <div class="flex items-center gap-2 mb-3">
+                            <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
+                            <span class="text-xs font-bold text-slate-300">Active Test Tokens (Heuristic Helper)</span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mb-3 leading-relaxed">Click any simulated token below to dynamically pre-fill and verify its associated agency portal session workspace:</p>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-center">
+                            <button onclick="applyTestToken('2-9828000040100')" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 transition p-2 rounded text-xs font-mono text-emerald-400 font-semibold">2-9828000040100</button>
+                            <button onclick="applyTestToken('1-4893000041135')" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 transition p-2 rounded text-xs font-mono text-emerald-400 font-semibold">1-4893000041135</button>
+                            <button onclick="applyTestToken('3-7721000010200')" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 transition p-2 rounded text-xs font-mono text-emerald-400 font-semibold">3-7721000010200</button>
+                            <button onclick="applyTestToken('4-9901000031200')" class="bg-slate-950 border border-slate-800 hover:border-emerald-500/50 hover:bg-slate-850 transition p-2 rounded text-xs font-mono text-emerald-400 font-semibold">4-9901000031200</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AUTHENTICATED PORTAL VIEW -->
+                <div id="portal-authenticated-view" class="hidden flex flex-col gap-6">
+                    <!-- Session Banner Header -->
+                    <div class="bg-emerald-950/20 border border-emerald-900/50 p-6 rounded-xl flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="p-3 bg-emerald-500/10 text-emerald-400 rounded-lg shrink-0">
+                                <i data-lucide="shield-check" class="w-8 h-8"></i>
+                            </div>
+                            <div>
+                                <h3 id="auth-agency-title" class="text-lg font-bold text-white">Omnicom Group</h3>
+                                <div class="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                                    <span class="font-mono text-emerald-400 font-semibold" id="auth-case-id">Case: 2-9828000040100</span>
+                                    <span>•</span>
+                                    <span id="auth-topic">Curriculum Track: 101-PMax Best Practices</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="lockSession()" class="bg-slate-900 hover:bg-slate-855 border border-slate-800 text-slate-300 font-semibold text-xs px-4 py-2 rounded-lg flex items-center gap-2 transition">
+                            <i data-lucide="lock" class="w-4 h-4 text-rose-400"></i> Lock Portal Workspace
+                        </button>
+                    </div>
+
+                    <!-- Workspace Action Grid tabs split -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Module 1: Pre-Camp Discovery Questionnaire -->
+                        <div class="bg-slate-955 rounded-xl border border-slate-800 p-6 flex flex-col gap-5">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <i data-lucide="edit-3" class="text-emerald-400 w-4 h-4"></i>
+                                    <span>1. Pre-Camp Client Discovery Input</span>
+                                </h4>
+                                <span id="discovery-status-badge" class="bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded">Discovery Received</span>
+                            </div>
+
+                            <form id="discovery-form" class="flex flex-col gap-4">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs text-slate-400 font-medium">Primary Activation Challenges & Hurdles</label>
+                                    <textarea id="discovery-hurdles-input" rows="3" placeholder="Describe current marketing conversion or tagging hurdles (e.g. S2S implementation details, attribution mapping rules)..." class="bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 p-3 focus:border-emerald-500 focus:outline-none"></textarea>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs text-slate-400 font-medium">Desired Customized Topics & Technical Focus</label>
+                                    <div class="grid grid-cols-2 gap-2 text-xs">
+                                        <label class="flex items-center gap-2 bg-slate-900 p-2.5 rounded-lg border border-slate-850 cursor-pointer hover:border-emerald-500/30 transition">
+                                            <input type="checkbox" checked class="accent-emerald-500">
+                                            <span>S2S Conversions</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 bg-slate-900 p-2.5 rounded-lg border border-slate-850 cursor-pointer hover:border-emerald-500/30 transition">
+                                            <input type="checkbox" checked class="accent-emerald-500">
+                                            <span>Smart Bidding Specs</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="submitDiscovery()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 rounded-lg transition uppercase tracking-wider mt-2">Submit Discovery Inputs</button>
+                            </form>
+                        </div>
+
+                        <!-- Module 2: Live Q&A Escalation Console -->
+                        <div class="bg-slate-955 rounded-xl border border-slate-800 p-6 flex flex-col gap-5">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <i data-lucide="help-circle" class="text-indigo-400 w-4 h-4"></i>
+                                    <span>2. Live Session Interactive Q&A</span>
+                                </h4>
+                                <span class="bg-indigo-500/20 text-indigo-300 text-[10px] font-bold px-2 py-0.5 rounded">Real-Time Sync</span>
+                            </div>
+
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Enter complex technical questions during your live session to escalate them directly to Google Product Managers and Subject Matter Experts.
+                            </p>
+
+                            <div class="flex gap-2">
+                                <input type="text" id="qa-question-input" placeholder="Type technical query (e.g. How to handle SKAN 4.0 mapping)..." class="flex-1 bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 p-3 focus:border-indigo-500 focus:outline-none">
+                                <button onclick="submitQaQuestion()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold px-4 rounded-lg transition flex items-center gap-1 shrink-0">
+                                    <i data-lucide="send" class="w-3.5 h-3.5"></i> Escalate to PM
+                                </button>
+                            </div>
+
+                            <!-- Q&A Real-time response box -->
+                            <div class="flex flex-col gap-2">
+                                <span class="text-[10px] text-slate-500 uppercase font-bold tracking-wider">Active Questions Captured This Session</span>
+                                <div id="qa-questions-list" class="flex flex-col gap-2 max-h-[140px] overflow-y-auto">
+                                    <!-- Populated dynamically via JS -->
+                                    <div class="bg-slate-900 p-3 rounded-lg border border-slate-850 flex flex-col gap-1">
+                                        <div class="flex justify-between items-center text-[10px]">
+                                            <span class="font-mono text-slate-400">Question ID: Q-9182</span>
+                                            <span class="text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded text-[8px] uppercase">Resolved</span>
+                                        </div>
+                                        <p class="text-xs text-slate-200">"What is the recommended conversion mapping for offline Floodlights?"</p>
+                                        <div class="text-[11px] text-emerald-300 bg-emerald-950/20 border-l-2 border-emerald-500 p-2 rounded mt-1.5 leading-relaxed font-medium">
+                                            <strong>Authoritative PM Answer:</strong> Use S2S connection metrics with Google Tag Gateway configurations.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module 3: Client Resource Access Hub (Bottom Left) -->
+                        <div class="bg-slate-955 rounded-xl border border-slate-800 p-6 flex flex-col gap-5">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <i data-lucide="download" class="text-indigo-400 w-4 h-4"></i>
+                                    <span>3. Curriculum Resource Downloads</span>
+                                </h4>
+                            </div>
+
+                            <div class="flex flex-col gap-3">
+                                <!-- Deck Download Item -->
+                                <div class="bg-slate-900 p-3.5 rounded-lg border border-slate-850 flex justify-between items-center hover:border-slate-800 transition">
+                                    <div class="flex items-center gap-3">
+                                        <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                                            <i data-lucide="file-text" class="w-5 h-5"></i>
+                                        </div>
+                                        <div>
+                                            <div class="text-xs font-semibold text-slate-200" id="resource-deck-title">PMax 101 - Master Deck.pdf</div>
+                                            <div class="text-[10px] text-slate-500">Customized presentation material (PDF)</div>
+                                        </div>
+                                    </div>
+                                    <button class="bg-slate-955 hover:bg-slate-800 border border-slate-855 text-slate-300 hover:text-white p-2 rounded-lg transition" title="Download Resource">
+                                        <i data-lucide="download" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+
+                                <!-- Recording Download Item -->
+                                <div id="recording-download-box" class="bg-slate-900 p-3.5 rounded-lg border border-slate-850 flex flex-col gap-3">
+                                    <div class="flex justify-between items-center">
+                                        <div class="flex items-center gap-3">
+                                            <div class="p-2 bg-indigo-500/10 text-indigo-400 rounded-lg">
+                                                <i data-lucide="video" class="w-5 h-5"></i>
+                                            </div>
+                                            <div>
+                                                <div class="text-xs font-semibold text-slate-200">Session Workshop Recording.mp4</div>
+                                                <div class="text-[10px] text-slate-500" id="recording-retention-msg">90-day retention clock active (89d left)</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2">
+                                            <button onclick="simulateArchive()" id="btn-archive-recording" class="bg-slate-955 hover:bg-slate-800 border border-slate-855 text-[10px] font-semibold text-slate-300 hover:text-emerald-400 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1">
+                                                <i data-lucide="archive" class="w-3.5 h-3.5"></i> Move to Shared Drive
+                                            </button>
+                                            <button class="bg-slate-955 hover:bg-slate-800 border border-slate-855 text-slate-300 hover:text-white p-2 rounded-lg transition">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="w-full bg-slate-950 h-1 rounded-full overflow-hidden">
+                                        <div class="bg-indigo-500 h-full w-[98%]"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Module 4: Post-Camp Feedback & Survey -->
+                        <div class="bg-slate-955 rounded-xl border border-slate-800 p-6 flex flex-col gap-5">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h4 class="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                                    <i data-lucide="star" class="text-emerald-400 w-4 h-4"></i>
+                                    <span>4. Post-Camp Feedback Survey</span>
+                                </h4>
+                            </div>
+
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                Provide your performance evaluation scores and qualitative comments to complete the lifecycle and automatically trigger the recalculation of the master ROI dashboard analytics metrics.
+                            </p>
+
+                            <form id="feedback-form" class="flex flex-col gap-4">
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs text-slate-400 font-medium">Rate the overall workshop visual quality:</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                                            <input type="radio" name="csat" value="1" class="accent-emerald-500"> 😠
+                                        </label>
+                                        <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                                            <input type="radio" name="csat" value="3" class="accent-emerald-500"> 😐
+                                        </label>
+                                        <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                                            <input type="radio" name="csat" value="4" class="accent-emerald-500"> 🙂
+                                        </label>
+                                        <label class="flex items-center gap-1.5 text-xs text-slate-300 cursor-pointer">
+                                            <input type="radio" name="csat" value="5" checked class="accent-emerald-500"> 🤩
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-1.5">
+                                    <label class="text-xs text-slate-400 font-medium">Qualitative Comments & Suggestions</label>
+                                    <textarea rows="2" id="feedback-comments" placeholder="E.g. Excellent slides structure! collapsible vertical left rails save space..." class="bg-slate-900 border border-slate-800 rounded-lg text-xs text-slate-100 p-2.5 focus:border-emerald-500 focus:outline-none"></textarea>
+                                </div>
+                                <button type="button" onclick="submitFeedbackSurvey()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2 rounded-lg transition uppercase tracking-wider">Submit Survey & Close Case</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Notification Inbound Toast Box (Top Floating right) -->
+    <div id="toast-box" class="fixed bottom-6 right-6 bg-slate-950 border border-slate-800 p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm transition duration-300 translate-y-24 opacity-0 z-50">
+        <div class="p-2 bg-indigo-600/20 text-indigo-400 rounded-lg shrink-0">
+            <i data-lucide="bell-ring" class="w-5 h-5"></i>
+        </div>
+        <div class="flex-1">
+            <h4 class="text-xs font-bold text-white mb-0.5">Real-Time Ingestion System</h4>
+            <p id="toast-message" class="text-[11px] text-slate-400 leading-relaxed"></p>
+        </div>
+    </div>
+
+    <script>
+        // Init Icons
+        lucide.createIcons();
+
+        // Simulated Database State Memory Object
+        const sessionDatabase = {
+            "1-4893000041135": {
+                caseId: "1-4893000041135",
+                agencyName: "Starcom Global",
+                topic: "101-PMax Best Practices",
+                deckTitle: "PMax 101 - Starcom Baseline.pdf",
+                presenter: "Jordan Blake",
+                plannedDate: "May 31, 2026",
+                platform: "GVC",
+                status: "Awaiting Discovery",
+                discoveryText: "",
+                qaList: [
+                    { id: "Q-110", text: "How to handle custom conversions mapping for S2S?", status: "Pending", answer: "" }
+                ],
+                recordingArchived: false,
+                surveyCompleted: false
+            },
+            "2-9828000040100": {
+                caseId: "2-9828000040100",
+                agencyName: "Omnicom Group",
+                topic: "101-PMax Best Practices",
+                deckTitle: "PMax 101 - Omnicom Customized.pdf",
+                presenter: "Taylor Chen",
+                plannedDate: "May 31, 2026",
+                platform: "GVC",
+                status: "Discovery Received",
+                discoveryText: "Offline conversions integration with regional floodlight triggers.",
+                qaList: [
+                    { id: "Q-201", text: "What is the recommended conversion mapping for offline Floodlights?", status: "Resolved", answer: "Use S2S connection metrics with Google Tag Gateway configurations." }
+                ],
+                recordingArchived: false,
+                surveyCompleted: false
+            },
+            "3-7721000010200": {
+                caseId: "3-7721000010200",
+                agencyName: "Dentsu Aegis",
+                topic: "KPI Camp: Search & PMax AI Bidding",
+                deckTitle: "Dentsu 201 - Search & PMax Advanced.pdf",
+                presenter: "Alex Rivera",
+                plannedDate: "May 18, 2026",
+                platform: "Teams",
+                status: "In-Camp Live",
+                discoveryText: "Bidding threshold alignments.",
+                qaList: [],
+                recordingArchived: false,
+                surveyCompleted: false
+            },
+            "4-9901000031200": {
+                caseId: "4-9901000031200",
+                agencyName: "Publicis Groupe",
+                topic: "Partnership Ads Training (MFG - WPP)",
+                deckTitle: "Publicis 101 - Custom Deck.pdf",
+                presenter: "Alex Rivera",
+                plannedDate: "May 17, 2026",
+                platform: "GVC",
+                status: "SLA Escalated (PM)",
+                discoveryText: "Partner integration requirements.",
+                qaList: [],
+                recordingArchived: false,
+                surveyCompleted: false
+            }
+        };
+
+        let activeCaseId = "1-4893000041135";
+
+        // Dynamic Navigation Routing function
+        function switchTab(tabId) {
+            document.getElementById('tab-dashboard-overview').classList.add('hidden');
+            document.getElementById('tab-partner-sessions').classList.add('hidden');
+            document.getElementById('tab-agency-portal').classList.add('hidden');
+            
+            document.getElementById('nav-dashboard-overview').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-slate-100";
+            document.getElementById('nav-partner-sessions').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-slate-100";
+            document.getElementById('nav-agency-portal').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-400 hover:bg-slate-900 hover:text-slate-100";
+
+            if (tabId === 'dashboard-overview') {
+                document.getElementById('tab-dashboard-overview').classList.remove('hidden');
+                document.getElementById('nav-dashboard-overview').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-100 bg-indigo-600/10 border-l-2 border-indigo-500";
+            } else if (tabId === 'partner-sessions') {
+                document.getElementById('tab-partner-sessions').classList.remove('hidden');
+                document.getElementById('nav-partner-sessions').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-100 bg-indigo-600/10 border-l-2 border-indigo-500";
+            } else if (tabId === 'agency-portal') {
+                document.getElementById('tab-agency-portal').classList.remove('hidden');
+                document.getElementById('nav-agency-portal').className = "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition text-slate-100 bg-indigo-600/10 border-l-2 border-indigo-500";
+            }
+        }
+
+        // Show Session Detail inside Partner Sessions Tab
+        function showSessionDetail(caseId) {
+            activeCaseId = caseId;
+            const data = sessionDatabase[caseId];
+            
+            // Highlight row
+            document.querySelectorAll('.select-row').forEach(row => {
+                row.classList.remove('bg-indigo-650/15', 'border-l-2', 'border-indigo-500');
+            });
+            document.getElementById(`row-${caseId}`).classList.add('bg-indigo-650/15', 'border-l-2', 'border-indigo-500');
+
+            // Populate data details
+            document.getElementById('detail-agency-name').innerText = data.agencyName;
+            document.getElementById('detail-case-id').innerText = `Case ID: ${data.caseId}`;
+            document.getElementById('detail-presenter').innerText = data.presenter;
+            document.getElementById('detail-planned-date').innerText = data.plannedDate;
+
+            // Conditional rendering for MS Teams warnings
+            const warningBox = document.getElementById('detail-teams-warning');
+            const telemetryPill = document.getElementById('telemetry-pill');
+            const telemetryConsole = document.getElementById('telemetry-console-msg');
+
+            if (data.platform === 'Teams') {
+                warningBox.classList.remove('hidden');
+                telemetryPill.innerText = "Teams Ingestion Active";
+                telemetryPill.className = "text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded uppercase font-bold text-[9px]";
+                telemetryConsole.innerText = "[SUCCESS] MS Teams API (E2E Telemetry Ingestion): Connection stream validated. Standard GDPR scrubbing initialized.";
+                telemetryConsole.className = "text-[10px] text-blue-300 font-mono leading-relaxed";
+            } else {
+                warningBox.classList.add('hidden');
+                telemetryPill.innerText = "Meet Sync Ready";
+                telemetryPill.className = "text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded uppercase font-bold text-[9px]";
+                telemetryConsole.innerText = "[SUCCESS] Google Calendar Integration checked. Virtual conference coordinates successfully scheduled.";
+                telemetryConsole.className = "text-[10px] text-emerald-300 font-mono leading-relaxed";
+            }
+
+            // Update Checklist visual states
+            const bullet = document.getElementById('checklist-discovery-bullet');
+            const desc = document.getElementById('checklist-discovery-desc');
+            if (data.status === 'Awaiting Discovery') {
+                bullet.className = "w-3.5 h-3.5 rounded-full bg-slate-700 flex items-center justify-center text-[10px] text-white font-bold shrink-0";
+                bullet.innerHTML = "!";
+                desc.innerText = "Discovery Form Pending client input inside agency portal sandbox.";
+                desc.className = "text-[10px] text-amber-400 font-semibold";
+            } else {
+                bullet.className = "w-3.5 h-3.5 rounded-full bg-emerald-500 flex items-center justify-center text-[10px] text-white font-bold shrink-0";
+                bullet.innerHTML = "✓";
+                desc.innerText = "Discovery Received and database records successfully updated.";
+                desc.className = "text-[10px] text-slate-500";
+            }
+        }
+
+        // Apply Test Token on Heuristic helper click
+        function applyTestToken(token) {
+            document.getElementById('portal-token-input').value = token;
+            verifySecureToken();
+        }
+
+        // Verify Token Gate
+        function verifySecureToken() {
+            const inputVal = document.getElementById('portal-token-input').value.trim();
+            const errorLabel = document.getElementById('secure-gate-error');
+            
+            if (sessionDatabase[inputVal]) {
+                errorLabel.classList.add('hidden');
+                loadAuthenticatedPortal(inputVal);
+            } else {
+                errorLabel.classList.remove('hidden');
+            }
+        }
+
+        // Load Authenticated Portal Workspace
+        function loadAuthenticatedPortal(caseId) {
+            const data = sessionDatabase[caseId];
+            
+            document.getElementById('portal-secure-gate').classList.add('hidden');
+            document.getElementById('portal-authenticated-view').classList.remove('hidden');
+
+            document.getElementById('auth-agency-title').innerText = data.agencyName;
+            document.getElementById('auth-case-id').innerText = `Case: ${data.caseId}`;
+            document.getElementById('auth-topic').innerText = `Curriculum Track: ${data.topic}`;
+            document.getElementById('resource-deck-title').innerText = data.deckTitle;
+
+            // Set Discovery input values
+            document.getElementById('discovery-hurdles-input').value = data.discoveryText;
+            const badge = document.getElementById('discovery-status-badge');
+            if (data.status === 'Awaiting Discovery') {
+                badge.innerText = "Pending Submission";
+                badge.className = "bg-amber-500/20 text-amber-300 text-[10px] font-bold px-2 py-0.5 rounded animate-pulse";
+            } else {
+                badge.innerText = "Discovery Received";
+                badge.className = "bg-emerald-500/20 text-emerald-300 text-[10px] font-bold px-2 py-0.5 rounded";
+            }
+
+            // Render Dynamic Q&A list for active session
+            renderQaList(data);
+
+            // Handle Archiving status visually
+            updateRecordingRetentionState(data);
+        }
+
+        // Render live Q&A array elements
+        function renderQaList(data) {
+            const container = document.getElementById('qa-questions-list');
+            if (data.qaList.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 italic p-3 text-center bg-slate-900 rounded-lg border border-slate-850">No questions escalated during this session yet.</p>`;
+                return;
+            }
+
+            container.innerHTML = data.qaList.map(q => `
+                <div class="bg-slate-900 p-3.5 rounded-lg border border-slate-850 flex flex-col gap-1.5 transition">
+                    <div class="flex justify-between items-center text-[10px]">
+                        <span class="font-mono text-slate-500">Question ID: ${q.id}</span>
+                        <span class="${q.status === 'Resolved' ? 'text-emerald-400 bg-emerald-500/10' : 'text-amber-400 bg-amber-500/10'} px-2 py-0.5 rounded text-[8px] font-extrabold uppercase tracking-wider">${q.status}</span>
+                    </div>
+                    <p class="text-xs text-slate-200 font-medium">"${q.text}"</p>
+                    ${q.answer ? `
+                        <div class="text-[11px] text-emerald-300 bg-emerald-950/25 border-l-2 border-emerald-500 p-2.5 rounded mt-1.5 leading-relaxed">
+                            <strong>Authoritative PM Answer:</strong> ${q.answer}
+                        </div>
+                    ` : `
+                        <div class="text-[10px] text-amber-300 bg-amber-500/5 border-l-2 border-amber-650 p-2 rounded mt-1.5 leading-relaxed italic">
+                            <i class="w-3 h-3 inline-block mr-1"></i> PM Expert notified. Awaiting authoritative webhook reply sync...
+                        </div>
+                    `}
+                </div>
+            `).join('');
+        }
+
+        // Lock session and return to token gate
+        function lockSession() {
+            document.getElementById('portal-authenticated-view').classList.add('hidden');
+            document.getElementById('portal-secure-gate').classList.remove('hidden');
+        }
+
+        // Simulate AM notification alerts via Toast box
+        function simulateNudgeAM() {
+            const agency = document.getElementById('detail-agency-name').innerText;
+            showToast(`[SENT] Automated SLA Nudge sent successfully to the assigned Partner AE for ${agency}!`);
+        }
+
+        // Submit client discovery form
+        function submitDiscovery() {
+            const inputVal = document.getElementById('discovery-hurdles-input').value;
+            const currentToken = document.getElementById('portal-token-input').value.trim();
+            const data = sessionDatabase[currentToken];
+
+            data.discoveryText = inputVal;
+            data.status = "Discovery Received";
+            
+            // Reload UI
+            loadAuthenticatedPortal(currentToken);
+            showToast(`[SUCCESS] Spanner Transaction logged. Client Discovery details saved for Case ID ${currentToken}.`);
+        }
+
+        // Submit Live Session Q&A query
+        function submitQaQuestion() {
+            const questionText = document.getElementById('qa-question-input').value.trim();
+            if (!questionText) return;
+
+            const currentToken = document.getElementById('portal-token-input').value.trim();
+            const data = sessionDatabase[currentToken];
+
+            const newQ = {
+                id: `Q-${Math.floor(1000 + Math.random() * 9000)}`,
+                text: questionText,
+                status: "Pending",
+                answer: ""
+            };
+
+            data.qaList.push(newQ);
+            document.getElementById('qa-question-input').value = "";
+            
+            // Re-render
+            renderQaList(data);
+            showToast(`[ESCALATED] Ticket successfully routed into GPEG Buganizer backlog queue.`);
+
+            // Simulate PM solving question in 4 seconds
+            setTimeout(() => {
+                newQ.status = "Resolved";
+                newQ.answer = "Verified. Implement enhanced conversions mapping parameters using Google Tag Gateway (GTG).";
+                renderQaList(data);
+                showToast(`[RESOLVED] Authoritative Expert answer synced into sandbox for Case ID ${currentToken}!`);
+            }, 4000);
+        }
+
+        // Submit Post-Camp Feedback survey
+        function submitFeedbackSurvey() {
+            const comments = document.getElementById('feedback-comments').value;
+            const currentToken = document.getElementById('portal-token-input').value.trim();
+            const data = sessionDatabase[currentToken];
+
+            data.surveyCompleted = true;
+            data.status = "Closed";
+            
+            showToast(`[CLOSED] Feedback logged. Dynamic CSAT recalculations triggered automatically inside master metrics!`);
+            lockSession();
+        }
+
+        // Simulate Archive process to Shared Drive to prevent 90-day deletion
+        function simulateArchive() {
+            const currentToken = document.getElementById('portal-token-input').value.trim();
+            const data = sessionDatabase[currentToken];
+
+            data.recordingArchived = true;
+            updateRecordingRetentionState(data);
+            showToast(`[ARCHIVED] Content safely cataloged in Google Shared Drive. Excluded from 90-day deletion sweep.`);
+        }
+
+        // Helper function to show notifications
+        function showToast(message) {
+            const box = document.getElementById('toast-box');
+            document.getElementById('toast-message').innerText = message;
+            box.className = "fixed bottom-6 right-6 bg-slate-955 border border-slate-800 p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm transition duration-300 translate-y-0 opacity-100 z-50";
+
+            setTimeout(() => {
+                box.className = "fixed bottom-6 right-6 bg-slate-955 border border-slate-800 p-4 rounded-xl shadow-2xl flex items-start gap-3 max-w-sm transition duration-300 translate-y-24 opacity-0 z-50";
+            }, 4500);
+        }
+
+        // Helper function to visually update recording state
+        function updateRecordingRetentionState(data) {
+            const msgEl = document.getElementById('recording-retention-msg');
+            const btnEl = document.getElementById('btn-archive-recording');
+
+            if (data.recordingArchived) {
+                msgEl.innerText = "Safely Archived: Excluded from deletion policies";
+                msgEl.className = "text-[10px] text-emerald-400 font-semibold";
+                btnEl.className = "bg-emerald-950/20 text-emerald-400 border border-emerald-900/40 text-[10px] font-semibold px-2.5 py-1.5 rounded-lg transition flex items-center gap-1 cursor-default";
+                btnEl.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Saved in Shared Drive`;
+            } else {
+                msgEl.innerText = "90-day retention clock active (89d left)";
+                msgEl.className = "text-[10px] text-slate-500";
+                btnEl.className = "bg-slate-900 hover:bg-slate-800 border border-slate-855 text-[10px] font-semibold text-slate-300 hover:text-emerald-400 px-2.5 py-1.5 rounded-lg transition flex items-center gap-1";
+                btnEl.innerHTML = `<i data-lucide="archive" class="w-3.5 h-3.5"></i> Move to Shared Drive`;
+            }
+            lucide.createIcons();
+        }
+
+        // Set Default Row selection active
+        showSessionDetail('1-4893000041135');
+    </script>
+</body>
+</html>
