@@ -2,7 +2,7 @@
 
 A premium, highly interactive full-stack sandbox portal built to coordinate, streamline, and optimize the Google GPEG Camps execution lifecycle.
 
-✨ **Live Static Interactive Demo**: [https://chan8822.github.io/camps-portal/index.html](https://chan8822.github.io/camps-portal/index.html)
+✨ **Live Static Interactive Demo**: [https://chandansinghr-ship-it.github.io/gpeg-camps/index.html](https://chandansinghr-ship-it.github.io/gpeg-camps/index.html)
 
 ---
 

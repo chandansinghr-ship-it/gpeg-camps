@@ -48,8 +48,9 @@ By unifying fragmented CRM ticket ingestion, automating scheduling, securing pro
 ### 🔗 Sandbox Exploration Links
 
 *   **Live Static Interactive Demo**:  
-    👉 **[https://chan8822.github.io/camps-portal/index.html](https://chan8822.github.io/camps-portal/index.html)**
+    👉 **[https://chandansinghr-ship-it.github.io/gpeg-camps/index.html](https://chandansinghr-ship-it.github.io/gpeg-camps/index.html)**
 *   **Interactive Testing Playbook**:  
-    👉 **[camps_command_center_playbook.md on GitHub](https://github.com/chan8822/camps-portal/blob/main/camps_command_center_playbook.md)**
+    👉 **[camps_command_center_playbook.md on GitHub](https://github.com/chandansinghr-ship-it/gpeg-camps/blob/main/camps_command_center_playbook.md)**
 *   **Private Codebase Repository**:  
-    👉 **[https://github.com/chan8822/camps-portal](https://github.com/chan8822/camps-portal)**
+    👉 **[https://github.com/chandansinghr-ship-it/gpeg-camps](https://github.com/chandansinghr-ship-it/gpeg-camps)**
+
