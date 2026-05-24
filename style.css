@@ -2488,11 +2488,15 @@ body.light-theme {
   flex-direction: column;
   min-width: 0;
   background: var(--g-bg-background);
+  margin-left: 0 !important;
+  padding-left: 0 !important;
 }
+
+
 
 /* Vertical Left Navigation Rail */
 .google-nav-rail {
-  width: 256px;
+  width: 240px;
   background: var(--g-bg-rail);
   border-right: 1px solid var(--g-border);
   display: flex;
@@ -2507,8 +2511,9 @@ body.light-theme {
 }
 
 .google-nav-rail.collapsed {
-  width: 68px;
+  width: 72px;
 }
+
 
 .rail-header {
   display: flex;

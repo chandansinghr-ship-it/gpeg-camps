@@ -2517,13 +2517,14 @@ window.changeActiveRole = async function(role) {
   }
   
   // Default Operational landing tabs to prevent metrics overwhelm!
-  if (role === 'Presenter' || role === 'AM' || role === 'Organizer') {
+  if (role === 'Presenter' || role === 'AM' || role === 'Organizer' || role === 'Admin') {
     window.switchTab('pipeline');
   } else if (role === 'PM') {
     window.switchTab('pm');
-  } else if (role === 'Stakeholder' || role === 'Admin') {
+  } else if (role === 'Stakeholder') {
     window.switchTab('dashboard');
   }
+
   
   window.renderTasks();
   window.renderChats();
