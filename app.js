@@ -793,18 +793,22 @@ function getActionButton(camp) {
   if (camp.stage === 'nomination') {
     actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openKickoffModal('${camp.id}')">Kickoff Camp</button>`;
   } else if (camp.stage === 'pre-camp') {
-    const disabled = camp.discoveryStatus === 'Pending' ? 'disabled title="Awaiting client discovery form submission"' : '';
-    const label = camp.discoveryStatus === 'Submitted' ? 'Start Workshop' : 'Awaiting Discovery';
-    const btnClass = camp.discoveryStatus === 'Submitted' ? 'btn-primary-sm' : '';
-    actionBtn = `<button class="btn-sm ${btnClass}" ${disabled} onclick="startLiveSessionPrompt('${camp.id}')">${label}</button>`;
+    if (camp.discoveryStatus === 'Pending') {
+      // Prompt Nudge AM CTA directly on Awaiting Discovery pre-camp cards
+      actionBtn = `<button class="btn-sm btn-primary-sm" style="background: var(--warning-amber); border-color: var(--warning-amber); color: var(--bg-darker);" onclick="window.nudgeAmEmailChase('${camp.id}')">⚡ Nudge AM</button>`;
+    } else {
+      actionBtn = `<button class="btn-sm btn-primary-sm" onclick="startLiveSessionPrompt('${camp.id}')">Start Workshop</button>`;
+    }
   } else if (camp.stage === 'in-camp') {
     actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openLiveSessionModal('${camp.id}')">Presenter Console</button>`;
   } else if (camp.stage === 'post-camp') {
     const pendingQuestions = camp.liveQuestions.some(q => !q.answered);
-    const disabled = pendingQuestions ? 'disabled title="Must resolve all escalated PM questions first"' : '';
-    const label = pendingQuestions ? 'Q&A Resolving...' : 'Draft Follow-up';
-    const btnClass = pendingQuestions ? '' : 'btn-primary-sm';
-    actionBtn = `<button class="btn-sm ${btnClass}" ${disabled} onclick="openFollowUpModal('${camp.id}')">${label}</button>`;
+    if (pendingQuestions) {
+      // Prompt PM Debugger Console direct CTA
+      actionBtn = `<button class="btn-sm btn-primary-sm" style="background: var(--danger-red); border-color: var(--danger-red); color: #fff;" onclick="window.switchTab('pm')">🐛 PM Debugger</button>`;
+    } else {
+      actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openFollowUpModal('${camp.id}')">Draft Follow-up</button>`;
+    }
   } else {
     return `<span style="font-size: 0.75rem; color: var(--success-green); font-weight: 600;">Completed ✅</span>`;
   }
@@ -814,6 +818,7 @@ function getActionButton(camp) {
   
   return `<div style="display: flex; align-items: center; gap: 0.25rem; width: 100%;">${actionBtn}${colBtn}</div>`;
 }
+
 
 function renderSidebarSlaList() {
   const listEl = document.getElementById('sidebar-sla-list');
