@@ -24,34 +24,35 @@
         <div class="rail-group-header">Camps Workflow</div>
         
         <!-- Step 1: CRM Ingestion Inbox (Cases Sandbox) -->
-        <button class="rail-nav-item active" id="nav-cases" onclick="switchTab('cases')">
+        <button class="rail-nav-item active tooltip-trigger" id="nav-cases" onclick="switchTab('cases')" data-tooltip="Cases Connect: View incoming camp requests dynamically synced from Connect CRM alerts.">
           <span class="rail-nav-icon">📂</span>
           <span class="rail-nav-label">Step 1: Nomination Inbox</span>
         </button>
 
         <!-- Step 2: Kanban Active Pipeline -->
-        <button class="rail-nav-item" id="nav-pipeline" onclick="switchTab('pipeline')">
+        <button class="rail-nav-item tooltip-trigger" id="nav-pipeline" onclick="switchTab('pipeline')" data-tooltip="Camps Pipeline: Coordinate active workshops across swimlane columns from nomination to closure.">
           <span class="rail-nav-icon">⌥</span>
           <span class="rail-nav-label">Step 2: Active Pipeline</span>
         </button>
 
         <!-- Step 2.5: Daily Action Hub & Collaboration -->
-        <button class="rail-nav-item" id="nav-daily-hub" onclick="switchTab('daily-hub')">
+        <button class="rail-nav-item tooltip-trigger" id="nav-daily-hub" onclick="switchTab('daily-hub')" data-tooltip="Action Hub: Access daily tasks checklists, timesheet loggers, and team collaboration slots.">
           <span class="rail-nav-icon">⚡</span>
           <span class="rail-nav-label">Step 2.5: Daily Action Hub</span>
         </button>
 
         <!-- Step 3: PM Escalation Queue -->
-        <button class="rail-nav-item" id="nav-pm" onclick="switchTab('pm')">
+        <button class="rail-nav-item tooltip-trigger" id="nav-pm" onclick="switchTab('pm')" data-tooltip="PM Expert Queue: Resolve escalated technical questions directly with Google Product Managers.">
           <span class="rail-nav-icon">🐛</span>
           <span class="rail-nav-label">Step 3: PM Expert Queue</span>
         </button>
 
         <!-- Step 4: Email outbox Gateway -->
-        <button class="rail-nav-item" id="nav-mail" onclick="switchTab('mail')">
+        <button class="rail-nav-item tooltip-trigger" id="nav-mail" onclick="switchTab('mail')" data-tooltip="Outbox Gateway: Compose client pre-camp welcomes, Q&A notifications, and follow-ups E2E.">
           <span class="rail-nav-icon">🚀</span>
           <span class="rail-nav-label">Step 4: Outbox Gateway</span>
         </button>
+
 
 
         <!-- Collapsible Interactive Expander Trigger Button -->
