@@ -789,12 +789,53 @@ function getStageBadgeColor(status) {
 }
 
 function getActionButton(camp) {
+  const role = state.activeRole; // Read dynamic active persona E2E!
   let actionBtn = '';
+
+  // 1. PM ROLE CTAs (Focused strictly on Q&A Debugging and Resolutions)
+  if (role === 'PM') {
+    const pendingQuestions = camp.liveQuestions.some(q => !q.answered);
+    if (pendingQuestions) {
+      return `<button class="btn-sm btn-primary-sm" style="background: var(--danger-red); border-color: var(--danger-red); color: #fff;" onclick="window.switchTab('pm')">🐛 Resolve Q&A</button>`;
+    }
+    return `<span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Read-Only Lock 🔒</span>`;
+  }
+
+  // 2. AM ROLE CTAs (Focused strictly on chasing client discoveries and outbox gateways)
+  if (role === 'AM') {
+    if (camp.stage === 'pre-camp' && camp.discoveryStatus === 'Pending') {
+      return `<button class="btn-sm btn-primary-sm" style="background: var(--warning-amber); border-color: var(--warning-amber); color: var(--bg-darker);" onclick="window.nudgeAmEmailChase('${camp.id}')">⚡ Nudge AM</button>`;
+    }
+    return `<span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Read-Only Lock 🔒</span>`;
+  }
+
+  // 3. PRESENTER ROLE CTAs (Focused strictly on rehearsals and live session deliveries)
+  if (role === 'Presenter') {
+    if (camp.stage === 'pre-camp') {
+      if (camp.discoveryStatus === 'Pending') {
+        return `<button class="btn-sm" onclick="window.switchTab('rehearsal')">🎤 Practice Pitch</button>`;
+      }
+      return `<button class="btn-sm btn-primary-sm" onclick="startLiveSessionPrompt('${camp.id}')">Start Workshop</button>`;
+    } else if (camp.stage === 'in-camp') {
+      return `<button class="btn-sm btn-primary-sm" onclick="openLiveSessionModal('${camp.id}')">Presenter Console</button>`;
+    } else if (camp.stage === 'post-camp') {
+      const pendingQuestions = camp.liveQuestions.some(q => !q.answered);
+      if (pendingQuestions) {
+        return `<span style="font-size: 0.72rem; color: var(--warning-amber); font-weight: 600;">Awaiting PM Debug ⏳</span>`;
+      }
+      return `<button class="btn-sm btn-primary-sm" onclick="openFollowUpModal('${camp.id}')">Draft Follow-up</button>`;
+    } else if (camp.stage === 'nomination') {
+      return `<span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 600;">Awaiting AM Kickoff ⏳</span>`;
+    } else {
+      return `<span style="font-size: 0.75rem; color: var(--success-green); font-weight: 600;">Completed ✅</span>`;
+    }
+  }
+
+  // 4. ORGANIZER / ADMIN ROLE CTAs (Full pipeline operations and scheduling authorized)
   if (camp.stage === 'nomination') {
     actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openKickoffModal('${camp.id}')">Kickoff Camp</button>`;
   } else if (camp.stage === 'pre-camp') {
     if (camp.discoveryStatus === 'Pending') {
-      // Prompt Nudge AM CTA directly on Awaiting Discovery pre-camp cards
       actionBtn = `<button class="btn-sm btn-primary-sm" style="background: var(--warning-amber); border-color: var(--warning-amber); color: var(--bg-darker);" onclick="window.nudgeAmEmailChase('${camp.id}')">⚡ Nudge AM</button>`;
     } else {
       actionBtn = `<button class="btn-sm btn-primary-sm" onclick="startLiveSessionPrompt('${camp.id}')">Start Workshop</button>`;
@@ -804,7 +845,6 @@ function getActionButton(camp) {
   } else if (camp.stage === 'post-camp') {
     const pendingQuestions = camp.liveQuestions.some(q => !q.answered);
     if (pendingQuestions) {
-      // Prompt PM Debugger Console direct CTA
       actionBtn = `<button class="btn-sm btn-primary-sm" style="background: var(--danger-red); border-color: var(--danger-red); color: #fff;" onclick="window.switchTab('pm')">🐛 PM Debugger</button>`;
     } else {
       actionBtn = `<button class="btn-sm btn-primary-sm" onclick="openFollowUpModal('${camp.id}')">Draft Follow-up</button>`;
@@ -818,6 +858,7 @@ function getActionButton(camp) {
   
   return `<div style="display: flex; align-items: center; gap: 0.25rem; width: 100%;">${actionBtn}${colBtn}</div>`;
 }
+
 
 
 function renderSidebarSlaList() {
