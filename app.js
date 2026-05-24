@@ -1065,10 +1065,32 @@ window.triggerConnectTicketCreation = async function() {
       window.logAction('SUCCESS', `Cases Connect Webhook Sync: Real-time signature verified sync for Case ${newCaseId} completed persistently.`);
       showToast('Cases Connect Sync', `Data 2026 Record ${newCaseId} successfully synced E2E.`);
 
+      // Trigger Phase 1: ML Opportunity Prioritizer Scoping
+      const scoping = window.calculateMlOpportunityScoping(newCaseId);
+      if (scoping) {
+        document.getElementById('scoping-headroom-display').textContent = `$${scoping.opportunityHeadroom}M`;
+        document.getElementById('scoping-arr-display').textContent = `$${scoping.calculatedArrPotential}M`;
+        
+        const badge = document.getElementById('scoping-priority-badge');
+        if (badge) {
+          badge.textContent = scoping.priority;
+          if (scoping.priority === 'P0 Critical') {
+            badge.style.background = 'rgba(239, 68, 68, 0.12)';
+            badge.style.color = 'var(--danger-red)';
+          } else if (scoping.priority === 'P1 High') {
+            badge.style.background = 'rgba(245, 158, 11, 0.12)';
+            badge.style.color = 'var(--warning-amber)';
+          } else {
+            badge.style.background = 'rgba(16, 185, 129, 0.12)';
+            badge.style.color = 'var(--success-green)';
+          }
+        }
+      }
+
       setTimeout(() => {
         window.switchTab('dashboard');
         renderDashboard();
-      }, 1500);
+      }, 4000); // Give 4 seconds delay to display premium ML metrics before redirection E2E!
     } else {
       const err = await response.json();
       throw new Error(err.error || 'Webhook secure post rejected');
@@ -1115,12 +1137,35 @@ window.triggerConnectTicketCreation = async function() {
     window.logAction('SUCCESS', `Cases Connect Webhook Sync (Offline Fallback): Secure sync for Case ${newCaseId} completed locally.`);
     showToast('Cases Connect Sync', `Data Record ${newCaseId} successfully synced (Offline Simulation).`);
 
+    // Trigger Phase 1: ML Opportunity Prioritizer Scoping (Offline Fallback)
+    const scoping = window.calculateMlOpportunityScoping(newCaseId);
+    if (scoping) {
+      document.getElementById('scoping-headroom-display').textContent = `$${scoping.opportunityHeadroom}M`;
+      document.getElementById('scoping-arr-display').textContent = `$${scoping.calculatedArrPotential}M`;
+      
+      const badge = document.getElementById('scoping-priority-badge');
+      if (badge) {
+        badge.textContent = scoping.priority;
+        if (scoping.priority === 'P0 Critical') {
+          badge.style.background = 'rgba(239, 68, 68, 0.12)';
+          badge.style.color = 'var(--danger-red)';
+        } else if (scoping.priority === 'P1 High') {
+          badge.style.background = 'rgba(245, 158, 11, 0.12)';
+          badge.style.color = 'var(--warning-amber)';
+        } else {
+          badge.style.background = 'rgba(16, 185, 129, 0.12)';
+          badge.style.color = 'var(--success-green)';
+        }
+      }
+    }
+
     setTimeout(() => {
       window.switchTab('dashboard');
       renderDashboard();
-    }, 1500);
+    }, 4000); // Give 4 seconds delay to display premium ML metrics before redirection E2E!
   }
 };
+
 
 // --- SANDBOX 2: AGENCY PORTAL VIEW ---
 function populateAgencyCampSelector() {

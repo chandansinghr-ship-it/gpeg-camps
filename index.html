@@ -1399,12 +1399,37 @@
               <li>The database instantiates a new camp tracking record automatically.</li>
               <li>A notification triggers in the GPEG team chat.</li>
             </ul>
-            <div id="cases-webhook-response-console" style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-light); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--primary-cyan); white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto;">// Inbound Webhook JSON Response Console
+            <div id="cases-webhook-response-console" style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-light); padding: 1rem; border-radius: 8px; font-family: monospace; font-size: 0.75rem; color: var(--primary-cyan); white-space: pre-wrap; word-break: break-all; max-height: 200px; overflow-y: auto; margin-bottom: 1rem;">// Inbound Webhook JSON Response Console
 // Trigger "Submit Ticket" to receive raw API responses...</div>
+
+            <!-- ⚡ PHASE 1: INTELLIGENT OPPORTUNITY SCOPING & ARR PRIORITIZER TELEMETRY -->
+            <div class="chart-container-box" style="padding: 1.25rem; border-color: var(--warning-amber-dim); background: rgba(245, 158, 11, 0.01); border-radius: 8px;">
+              <h4 style="color: var(--warning-amber); margin-top:0; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.35rem; font-size: 0.85rem; font-weight: 700;">
+                <span>⚡ ML Opportunity Scoping & Real-Time ARR Prioritizer</span>
+              </h4>
+              <p style="font-size: 0.7rem; color: var(--text-muted); line-height: 1.3; margin-bottom: 0.75rem;">
+                Calculates the strategic budget headroom and projected ARR potential based on the entered quarterly revenue. Opportunity scoping triggers immediately on ticket submission:
+              </p>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <div style="background: rgba(0,0,0,0.2); padding: 0.65rem; border-radius: 6px; border: 1px solid var(--border-light);">
+                  <span style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">Spend Headroom</span>
+                  <div id="scoping-headroom-display" style="font-size: 1.15rem; font-weight: 800; color: var(--text-primary); margin-top: 0.15rem;">--</div>
+                </div>
+                <div style="background: rgba(0,0,0,0.2); padding: 0.65rem; border-radius: 6px; border: 1px solid var(--border-light);">
+                  <span style="font-size: 0.65rem; color: var(--text-secondary); text-transform: uppercase; font-weight: 600;">ARR Potential</span>
+                  <div id="scoping-arr-display" style="font-size: 1.15rem; font-weight: 800; color: var(--primary-cyan); margin-top: 0.15rem;">--</div>
+                </div>
+              </div>
+              <div style="margin-top: 0.75rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.72rem; border-top: 1px dashed var(--border-light); padding-top: 0.6rem;">
+                <span style="color: var(--text-secondary);">Prioritization Tier:</span>
+                <span id="scoping-priority-badge" style="font-weight: 850; text-transform: uppercase; padding: 0.1rem 0.45rem; border-radius: 4px; background: rgba(255,255,255,0.05); color: var(--text-muted);">Not Calculated</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
 
     <!-- SECTION 3: AGENCY PORTAL (CLIENT SURVEYS) -->
     <div id="view-agency" class="view-section">
