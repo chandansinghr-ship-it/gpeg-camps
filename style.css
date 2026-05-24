@@ -2564,6 +2564,22 @@ body.light-theme {
   gap: 0.25rem;
 }
 
+/* Sleek scrollbar for long navigation rails */
+.rail-menu-body::-webkit-scrollbar {
+  width: 4px;
+}
+.rail-menu-body::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+}
+.rail-menu-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+.rail-menu-body::-webkit-scrollbar-thumb:hover {
+  background: var(--g-blue);
+}
+
+
 .rail-group-header {
   font-size: 0.68rem;
   font-weight: 700;
