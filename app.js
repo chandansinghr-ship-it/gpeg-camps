@@ -7478,5 +7478,36 @@ window.renderAgencyMosCatalog = function() {
   });
 };
 
+// --- DYNAMIC OUTBOX INGESTION & ACTIVE CTA ACTIONS (SRE/DA-09) ---
+window.nudgeAmEmailChase = function(caseId) {
+  const camp = state.camps.find(c => c.id === caseId);
+  if (!camp) return;
+
+  const mockChaseMail = {
+    id: `draft-${Math.floor(Math.random() * 90000) + 10000}`,
+    timestamp: new Date().toISOString(),
+    from: "gpeg-camps@google.com",
+    to: camp.amEmail,
+    cc: "gpeg-camps-archive@google.com",
+    bcc: "",
+    subject: `ACTION REQUIRED: Chase client discovery form for ${camp.agency} [Case ${camp.id}]`,
+    body: `Hi ${camp.amEmail.split('@')[0]},\n\nThis is an automated high-priority operational alert from the GPEG Command Center.\n\nWe noticed that the pre-camp discovery form for the ${camp.product} session with ${camp.agency} is still outstanding.\n\nCould you please reach out to the client agency contacts today to secure discovery answers? If the form is not submitted, our default deck protocols will apply. \n\nForm access link:\nhttps://camps.google.com/portal/agency-discovery?caseId=${camp.id}\n\nBest,\nGPEG Camps Team`
+  };
+
+  // Prepend drafted mail directly into state outbox
+  state.outbox.unshift(mockChaseMail);
+  saveState();
+
+  // Switch tab to draft logs view and prompt toast E2E!
+  switchTab('mail');
+  showToast('Nudge Dispatched ✉️', `Outbox chase drafted and logged to ${camp.amEmail} successfully!`);
+  window.logAction('WARNING', `Active Ingress: Dispatched manual AM nudge chase for outstanding case discovery on ${camp.agency} (Case ${camp.id}).`);
+};
+
+if (typeof window !== 'undefined') {
+  window.nudgeAmEmailChase = nudgeAmEmailChase;
+}
+
+
 
 
