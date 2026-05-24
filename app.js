@@ -7410,7 +7410,8 @@ window.renderMosCatalog = function() {
         
         <div style="display: flex; flex-direction: column; gap: 0.5rem; border-top: 1px solid var(--border-light); padding-top: 0.75rem;">
           <span style="font-size: 0.68rem; color: var(--text-muted); font-family: monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${topic.baseDeckTitle}">📁 Deck: ${topic.baseDeckTitle}</span>
-          <button class="btn btn-primary-sm" onclick="window.nominateCampFromCatalog('${topic.topicId}')" style="width: 100%; font-size: 0.7rem; padding: 0.4rem; font-weight: 800; border-radius: 6px; cursor: pointer; background: var(--g-blue); color:#fff; border:none; box-shadow: 0 4px 10px rgba(66,133,244,0.2);">➕ Nominate Partner for this Camp</button>
+          <button class="btn btn-primary-sm" onclick="window.nominateCampFromCatalog('${topic.topicId}')" style="width: 100%; font-size: 0.7rem; padding: 0.4rem; font-weight: 800; border-radius: 6px; cursor: pointer; background: var(--g-blue) !important; color: #0b0f19 !important; border:none; box-shadow: 0 4px 10px rgba(66,133,244,0.2);">➕ Nominate Partner for this Camp</button>
+
         </div>
       </div>
     `);

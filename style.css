@@ -419,16 +419,18 @@ main {
 }
 
 .btn-primary-sm {
-  background: var(--primary-cyan);
-  color: var(--bg-darker);
-  border: 1px solid var(--primary-cyan);
+  background: var(--primary-cyan) !important;
+  color: #0b0f19 !important; /* Enforce high-contrast dark slate text */
+  border: 1px solid var(--primary-cyan) !important;
 }
 
 .btn-primary-sm:hover {
-  background: #00e5ff;
-  border-color: #00e5ff;
-  box-shadow: var(--shadow-glow);
+  background: #00e5ff !important;
+  border-color: #00e5ff !important;
+  color: #0b0f19 !important;
+  box-shadow: var(--shadow-glow) !important;
 }
+
 
 
 /* Card Badges / Indicators */
