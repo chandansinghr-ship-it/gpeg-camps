@@ -2722,13 +2722,15 @@ header {
 
 .btn-primary {
   background: var(--g-blue) !important;
-  color: #ffffff !important;
+  color: #0b0f19 !important; /* Enforce high-contrast dark slate text color */
 }
 
 .btn-primary:hover {
-  background: #357ae8 !important;
+  background: #00e5ff !important;
+  color: #0b0f19 !important;
   box-shadow: var(--shadow-glow) !important;
 }
+
 
 .priority-badge, .priority-high, .priority-medium, .priority-low {
   border-radius: 4px !important;
