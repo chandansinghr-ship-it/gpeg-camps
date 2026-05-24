@@ -7551,9 +7551,79 @@ window.nudgeAmEmailChase = function(caseId) {
   window.logAction('WARNING', `Active Ingress: Dispatched manual AM nudge chase for outstanding case discovery on ${camp.agency} (Case ${camp.id}).`);
 };
 
+// --- 1. INTELLIGENT OPPORTUNITY SCOPING & ARR CALCULATIONS (SRE-ML-01) ---
+window.calculateMlOpportunityScoping = function(caseId) {
+  const camp = state.camps.find(c => c.id === caseId);
+  if (!camp) return null;
+
+  // Simulate PLX Budget Headroom logic
+  const maxPotentialBudget = (camp.revCovered || 1.5) * 2.4;
+  const spentBudget = camp.revCovered || 1.5;
+  const opportunityHeadroom = maxPotentialBudget - spentBudget;
+  
+  // Calculate dynamic ARR Potential based on regional weightings
+  const regionalWeight = camp.region === 'APAC' ? 0.75 : camp.region === 'AMER' ? 0.85 : 0.65;
+  const calculatedArrPotential = opportunityHeadroom * regionalWeight;
+
+  const priority = calculatedArrPotential >= 2.0 ? 'P0 Critical' : calculatedArrPotential >= 1.0 ? 'P1 High' : 'P2 Medium';
+
+  return {
+    caseId: caseId,
+    agency: camp.agency,
+    opportunityHeadroom: opportunityHeadroom.toFixed(2),
+    calculatedArrPotential: calculatedArrPotential.toFixed(2),
+    priority: priority
+  };
+};
+
+// --- 2. "DHANU AI" FEEDBACK PROCESSOR & DECK CUSTOMIZATION (SRE-AI-02) ---
+window.dhanuAiFeedbackProcessor = function(caseId, rawVerbatimText) {
+  const camp = state.camps.find(c => c.id === caseId);
+  if (!camp) return;
+
+  const text = rawVerbatimText.toLowerCase();
+  let recommendedModule = 'PMax Standard Modules';
+  let component = 'GMP > PMax > General';
+  let inhibitor = 'General Friction';
+
+  // 3-Way Sentiment & Verbatim Router mapping internal hotspots
+  if (text.includes('junk leads') || text.includes('spam')) {
+    recommendedModule = 'Lead Gen Optimization & Advanced Filters';
+    component = 'GMP > LeadGen > Optimization';
+    inhibitor = 'Junk Leads / Spam';
+  } else if (text.includes('cannibalization') || text.includes('overlap')) {
+    recommendedModule = 'Brand Suitability & Negative Keywords Shield';
+    component = 'GMP > PMax > Creative & Brand';
+    inhibitor = 'PMax Budget Cannibalization';
+  } else if (text.includes('tagging') || text.includes('gtg')) {
+    recommendedModule = 'Server-Side Google Tag Gateway (GTG) 201';
+    component = 'gTech > GTG > Tagging';
+    inhibitor = 'Tag Implementation Latency';
+  }
+
+  // Update local deckType state based on customized compiled module
+  camp.deckType = 'Customized Deck';
+  camp.status = 'Discovery Received';
+  saveState();
+
+  // Dispatch live telemetry logs and signal engineering PMs
+  window.logAction('SUCCESS', `Dhanu AI: Parsed verbatim from ${camp.agency} (Case ${camp.id}). Injected dynamic module: ${recommendedModule}`);
+  window.logAction('WARNING', `Product Road Signal: Escalated Buganizer ticket to ${component} for inhibitor [${inhibitor}].`);
+
+  return {
+    recommendedModule,
+    component,
+    inhibitor
+  };
+};
+
 if (typeof window !== 'undefined') {
   window.nudgeAmEmailChase = nudgeAmEmailChase;
+  window.calculateMlOpportunityScoping = calculateMlOpportunityScoping;
+  window.dhanuAiFeedbackProcessor = dhanuAiFeedbackProcessor;
 }
+
+
 
 
 

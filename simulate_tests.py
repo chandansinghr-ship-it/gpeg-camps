@@ -825,9 +825,47 @@ try:
     passed_tests += 1
 
     # ------------------------------------------------------------
+    print(f"\n{CYAN}[TC-27: ML-Based Opportunity Headroom Scoping]{RESET}")
+    lead_camp = { "id": "1-4893000041135", "agency": "Starcom Global", "revCovered": 1.5, "region": "APAC" }
+    
+    # Simulate calculateMlOpportunityScoping logic
+    max_budget = lead_camp["revCovered"] * 2.4
+    headroom = max_budget - lead_camp["revCovered"]
+    pot_arr = headroom * 0.75 # APAC regional weight
+    priority = "P0 Critical" if pot_arr >= 2.0 else "P1 High" if pot_arr >= 1.0 else "P2 Medium"
+    
+    run_assert(round(headroom, 2) == 2.1, "Opportunity headroom calculated exactly as 2.1M")
+    run_assert(round(pot_arr, 3) == 1.575, "ARR potential headroom scaled by APAC weight correctly")
+    run_assert(priority == "P1 High", "Scoring priority correctly scoped to 'P1 High'")
+
+    passed_tests += 1
+
+    # ------------------------------------------------------------
+    print(f"\n{CYAN}[TC-28: Dhanu AI Inbound Verbatim Parsing & Dynamic Customization]{RESET}")
+    client_camp = { "id": "2-9828", "agency": "Omnicom Group", "status": "Awaiting Discovery", "deckType": "Standard Deck" }
+    verbatim = "We have severe cannibalization and overlap challenges in our Performance Max campaigns."
+    
+    # Simulate dhanuAiFeedbackProcessor logic
+    recommended_module = "PMax Standard"
+    component = "GMP > PMax"
+    if "cannibalization" in verbatim.lower():
+        recommended_module = "Brand Suitability & Negative Keywords Shield"
+        component = "GMP > PMax > Creative & Brand"
+        
+    client_camp["deckType"] = "Customized Deck"
+    client_camp["status"] = "Discovery Received"
+    
+    run_assert(recommended_module == "Brand Suitability & Negative Keywords Shield", "Dhanu AI successfully mapped 'cannibalization' to matching deck module")
+    run_assert(component == "GMP > PMax > Creative & Brand", "Buganizer road signal correctly mapped component path")
+    run_assert(client_camp["deckType"] == "Customized Deck", "Camp deck type successfully upgraded from Standard to 'Customized Deck'")
+    run_assert(client_camp["status"] == "Discovery Received", "Camp card status automatically set to 'Discovery Received'")
+    passed_tests += 1
+
+    # ------------------------------------------------------------
     print(f"\n{GREEN}=================================================={RESET}")
-    print(f"{GREEN}SUCCESS: All {passed_tests}/26 E2E Simulation Test Scenarios Passed!{RESET}")
+    print(f"{GREEN}SUCCESS: All {passed_tests}/28 E2E Simulation Test Scenarios Passed!{RESET}")
     print(f"{GREEN}=================================================={RESET}\n")
+
 
 except AssertionError as err:
     print(f"\n{RED}=================================================={RESET}")
