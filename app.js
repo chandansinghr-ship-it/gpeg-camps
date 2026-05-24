@@ -681,20 +681,21 @@ function renderDashboard() {
         ${camp.stage === 'closed' ? `
           <div style="margin-top: 0.35rem; display: flex; gap: 0.25rem;">
             ${camp.recordingDeleted ? `
-              <span class="ws-sync-pill" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.25); color: var(--danger-red); cursor: default;">⚙ Recording Purged (SLA)</span>
+              <span class="ws-sync-pill" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.25); color: var(--danger-red); cursor: default;">⚙ Purged (SLA)</span>
             ` : camp.recordingArchived ? `
-              <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green);" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">✓ Archived (Shared Drive)</span>
+              <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green);" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">⌥ Archived (Shared Drive)</span>
             ` : `
-              <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">☁ Move to Shared Drive</span>
+              <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">⌥ Move to Shared Drive</span>
             `}
-            <span class="ws-sync-pill ws-synced">✓ Exported Sheets</span>
+            <span class="ws-sync-pill ws-synced">⌥ Exported Sheets</span>
           </div>
         ` : camp.stage === 'post-camp' ? `
           <div style="margin-top: 0.35rem; display: flex; gap: 0.25rem;">
-            <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')">☁ Drive Sync</span>
-            <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')">📄 Doc Sync</span>
+            <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')">⌥ Drive Sync</span>
+            <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')">⌥ Doc Sync</span>
           </div>
         ` : ''}
+
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
           <span class="badge-deck-status ${camp.deckType === 'Customized Deck' ? 'badge-deck-custom' : ''}">${camp.deckType}</span>
