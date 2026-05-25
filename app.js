@@ -612,6 +612,18 @@ function renderDashboard() {
     visibleCamps = visibleCamps.filter(c => c.region === filterRegion);
   }
 
+  // 3.5 GPEG POD-Wise Filter
+  const filterPod = document.getElementById('filter-pod-select') ? document.getElementById('filter-pod-select').value : 'ALL';
+  if (filterPod !== 'ALL') {
+    visibleCamps = visibleCamps.filter(c => {
+      if (filterPod === 'Search' && (c.product.includes('Search') || c.product.includes('Bidding') || c.product.includes('Performance Max') || c.product.includes('PMax'))) return true;
+      if (filterPod === 'Video' && (c.product.includes('Video') || c.product.includes('YouTube') || c.product.includes('DV360'))) return true;
+      if (filterPod === 'Measurement' && (c.product.includes('Measurement') || c.product.includes('Analytics') || c.product.includes('Tag Gateway') || c.product.includes('GTG') || c.product.includes('CM360'))) return true;
+      return false;
+    });
+  }
+
+
   // 4. SLA Warning Filter
   const filterSla = document.getElementById('filter-sla-select') ? document.getElementById('filter-sla-select').value : 'ALL';
   if (filterSla === 'ALERT') {
