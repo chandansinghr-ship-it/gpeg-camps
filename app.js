@@ -7774,13 +7774,48 @@ window.openLookerCustomReport = function() {
   }, 1800);
 };
 
+// --- 5. MULTI-PLAYER BACKLOG SHARDING ALGORITHM (Inspired by `triage-party`) ---
+window.getShardedPresenter = function(caseId) {
+  const presenters = ['Taylor Chen (Presenter)', 'Alex Rivera (Presenter)', 'Jordan Blake (Presenter)'];
+  
+  // Calculate deterministic string hash modulo distribution E2E
+  let hash = 0;
+  for (let i = 0; i < caseId.length; i++) {
+    hash = caseId.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const shardedIndex = Math.abs(hash) % presenters.length;
+  return presenters[shardedIndex];
+};
+
+// --- 6. PERFETTO UI LATENCY & OBSERVABILITY TRACING ENGINE (Inspired by `perfetto`) ---
+window.triggerPerfettoTrace = function(label, simulatedDurationMs) {
+  const traceId = `trace-${Math.floor(Math.random() * 900000) + 100000}`;
+  window.logAction('INFO', `Perfetto Trace [${traceId}] STARTED for transaction: [${label}]`);
+
+  setTimeout(() => {
+    window.logAction('SUCCESS', `Perfetto Trace [${traceId}] COMPLETED: [${label}] took ${simulatedDurationMs}ms (Spanner query: 12ms, GWS REST: 45ms, Render: 8ms).`);
+  }, simulatedDurationMs);
+
+  return traceId;
+};
+
+// --- 7. STRUCTURED "AGENT SKILLS" PLAYBOOK DIRECTORY LOADER (Inspired by `google/skills`) ---
+window.loadGpegAgentSkill = function(skillName) {
+  window.logAction('SUCCESS', `Agent Skills: Dynamic playbooks loader retrieved [skills/${skillName}.md] into Gemini CLI prompt environment.`);
+  showToast('Agent Skill Loaded 🤖', `Playbook skills/${skillName}.md successfully mounted!`);
+};
+
 if (typeof window !== 'undefined') {
   window.nudgeAmEmailChase = nudgeAmEmailChase;
   window.calculateMlOpportunityScoping = calculateMlOpportunityScoping;
   window.dhanuAiFeedbackProcessor = dhanuAiFeedbackProcessor;
   window.triggerWorkspaceExport = triggerWorkspaceExport;
   window.openLookerCustomReport = openLookerCustomReport;
+  window.getShardedPresenter = getShardedPresenter;
+  window.triggerPerfettoTrace = triggerPerfettoTrace;
+  window.loadGpegAgentSkill = loadGpegAgentSkill;
 }
+
 
 
 
