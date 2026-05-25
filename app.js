@@ -3617,6 +3617,12 @@ window.postSupportMessage = function(text) {
     reply = "⚠️ Teams Platform Rule: MS Teams sessions require the Teams Recording link. Follow-up resource packaging is locked in the modal until the link is provided.";
   } else if (q.includes('partnership') || q.includes('ads')) {
     reply = "📣 Partnership Ads MFG/WPP sessions require a concise 45-60 minute limit check. Presenter console checklists dynamically load PA duration checks.";
+  } else if (q.includes('sop') || q.includes('workflow') || q.includes('process') || q.includes('playbook') || q.includes('rule')) {
+    reply = `📚 **GPEG Standard Operational Playbook (SOP) & Workflow Guidelines:**
+• **Discovery Timeline:** Secure Discovery Form answers within **3 days** of nomination. Outstanding discovery within **48 hours** triggers a \`P1 High\` SLA Warning.
+• **Interactive workshops:** Sessions are capped at **60-90 minutes**. Track all verbatims (`+"`cannibalization`"+`, `+"`junk leads`"+`, `+"`tagging`"+`) for dynamic template tailoring.
+• **Post-Camp SLA:** Resource dispatch and follow-ups must be archived and emailed within **24 hours**.
+• **Purge swept:** Closed camp recording videos are auto-purged after **90 days** unless safely moved to the GPEG Shared Drive folder!`;
   } else {
     isFallback = true;
   }
