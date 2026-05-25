@@ -1031,7 +1031,6 @@ window.triggerConnectTicketCreation = async function() {
   const agency = document.getElementById('cases-agency-input') ? document.getElementById('cases-agency-input').value.trim() : 'Starcom Global';
   const campType = document.getElementById('cases-camp-type') ? document.getElementById('cases-camp-type').value : 'Google Marketing Platform (GMP)';
   const topic = document.getElementById('cases-topic-input') ? document.getElementById('cases-topic-input').value.trim() : 'YouTube Buying in DV360';
-  const presenter = document.getElementById('cases-presenter-select') ? document.getElementById('cases-presenter-select').value : 'Taylor Chen';
   const platform = document.getElementById('cases-platform-input') ? document.getElementById('cases-platform-input').value : 'GVC';
   const deliveryType = document.getElementById('cases-delivery-type') ? document.getElementById('cases-delivery-type').value : 'Standard';
   const deckType = document.getElementById('cases-deck-input') ? document.getElementById('cases-deck-input').value : 'Standard Deck';
@@ -1054,6 +1053,14 @@ window.triggerConnectTicketCreation = async function() {
     document.getElementById('cases-sandbox-caseid').textContent = newCaseId;
   }
 
+  // ⚡ PHASE 3: MULTI-PLAYER SHARDED BACKLOG PRESENTATION ALLOCATOR
+  const assignedPresenter = window.getShardedPresenter(newCaseId);
+
+  // ⚡ PHASE 3: PERFETTO TRACING - RECORD INGESTION LATENCY POINT
+  if (typeof window.triggerPerfettoTrace === 'function') {
+    window.triggerPerfettoTrace('Spanner Ingress Ingestion Query', 1400);
+  }
+
   const payload = {
     id: newCaseId,
     country: country || 'SG',
@@ -1061,13 +1068,14 @@ window.triggerConnectTicketCreation = async function() {
     agency: agency,
     suite: campType,
     product: topic,
-    presenter: presenter,
+    presenter: assignedPresenter, // Automatically load sharded allocation E2E!
     platform: platform,
     deliveryType: deliveryType,
     deckType: deckType,
     nominationDate: plannedDate || new Date().toISOString().split('T')[0],
     scheduledTime: plannedDate ? `${plannedDate}T10:00:00Z` : null,
     duration: duration || 60,
+
     amEmail: amEmail,
     language: lang || 'EN',
     revCovered: revCovered || 0,
