@@ -683,11 +683,20 @@ function renderDashboard() {
             ${camp.recordingDeleted ? `
               <span class="ws-sync-pill" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.25); color: var(--danger-red); cursor: default;">⚙ Purged (SLA)</span>
             ` : camp.recordingArchived ? `
-              <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green);" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">⌥ Archived (Shared Drive)</span>
+              <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green); display: inline-flex; align-items: center; gap: 0.25rem;" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95A5.497 5.497 0 0 1 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11A2.98 2.98 0 0 1 22 15c0 1.66-1.34 3-3 3z" fill="#10b981"/></svg>
+                <span>Archived Drive</span>
+              </span>
             ` : `
-              <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">⌥ Move to Shared Drive</span>
+              <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
+                <span>Move to Shared Drive</span>
+              </span>
             `}
-            <span class="ws-sync-pill ws-synced" onclick="window.triggerWorkspaceExport('Sheets', '${camp.id}')" style="cursor: pointer;" title="One-Click export this closed case history to Google Sheets.">📊 Sheets Exported</span>
+            <span class="ws-sync-pill ws-synced" onclick="window.triggerWorkspaceExport('Sheets', '${camp.id}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click export this closed case history to Google Sheets.">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-2v-4H7v-2h3v-4h2v4h4v2z" fill="#10b981"/></svg>
+              <span>Sheets Synced</span>
+            </span>
           </div>
         ` : camp.stage === 'post-camp' ? `
           <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
