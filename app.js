@@ -700,15 +700,28 @@ function renderDashboard() {
           </div>
         ` : camp.stage === 'post-camp' ? `
           <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
-            <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')">⌥ Drive Sync</span>
-            <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')">⌥ Doc Sync</span>
-            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Slides', '${camp.id}')" style="cursor: pointer; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--warning-amber);" title="One-Click generate Gslides presentation pre-reads stripping Internal slides.">📊 Slides Exporter</span>
+            <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
+              <span>Drive Sync</span>
+            </span>
+            <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#2b6cb0"/></svg>
+              <span>Doc Sync</span>
+            </span>
+            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Slides', '${camp.id}')" style="cursor: pointer; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--warning-amber); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click generate Gslides presentation pre-reads stripping Internal slides.">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11H6v-2h12v2zm0-4H6V8h12v2z" fill="#d69e2e"/></svg>
+              <span>Slides Exporter</span>
+            </span>
           </div>
         ` : `
           <div style="margin-top: 0.35rem; display: flex; gap: 0.25rem;">
-            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Chat', '${camp.id}')" style="cursor: pointer; background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.2); color: var(--accent-purple);" title="One-Click format and broadcast this active camp card payload directly into internal Google Chat Space.">💬 Share to Chat</span>
+            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Chat', '${camp.id}')" style="cursor: pointer; background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.2); color: var(--accent-purple); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click format and broadcast this active camp card payload directly into internal Google Chat Space.">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="#8b5cf6"/></svg>
+              <span>Share to Chat</span>
+            </span>
           </div>
         `}
+
 
 
 
