@@ -535,11 +535,36 @@ def process_incoming_request(subject, body, thread_id, spanner_instance, spanner
         "language": lang
     }
     
-    # 7. Database Synchronization
+    # 7. Database Synchronization & Telemetry Dump
     try:
         upsert_spanner_record(spanner_client, spanner_instance, spanner_db, payload)
     except Exception as e:
         print(f"Database synchronize error: {e}")
+
+    # Write dynamic telemetry to frontend dashboard hook
+    try:
+        telemetry_path = os.path.join(os.path.dirname(__file__), "web", "live_telemetry.json")
+        telemetry_records = []
+        if os.path.exists(telemetry_path):
+            with open(telemetry_path, "r") as rf:
+                try:
+                    telemetry_records = json.load(rf)
+                except Exception:
+                    pass
+        telemetry_records.insert(0, {
+            "agency_name": payload["agency_name"],
+            "case_id": payload["case_id"],
+            "camp_type": payload["camp_type"],
+            "region": payload["region"],
+            "status": payload["status"],
+            "timestamp": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+        })
+        # Keep last 10 events only
+        telemetry_records = telemetry_records[:10]
+        with open(telemetry_path, "w") as wf:
+            json.dump(telemetry_records, wf, indent=2)
+    except Exception as te:
+        print(f"Telemetry writing bypass: {te}")
 
         
     # 8. Mark thread as read/processed in Gmail
