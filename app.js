@@ -3617,12 +3617,33 @@ window.postSupportMessage = function(text) {
     reply = "⚠️ Teams Platform Rule: MS Teams sessions require the Teams Recording link. Follow-up resource packaging is locked in the modal until the link is provided.";
   } else if (q.includes('partnership') || q.includes('ads')) {
     reply = "📣 Partnership Ads MFG/WPP sessions require a concise 45-60 minute limit check. Presenter console checklists dynamically load PA duration checks.";
-  } else if (q.includes('sop') || q.includes('workflow') || q.includes('process') || q.includes('playbook') || q.includes('rule')) {
-    reply = `📚 **GPEG Standard Operational Playbook (SOP) & Workflow Guidelines:**
-• **Discovery Timeline:** Secure Discovery Form answers within **3 days** of nomination. Outstanding discovery within **48 hours** triggers a \`P1 High\` SLA Warning.
-• **Interactive workshops:** Sessions are capped at **60-90 minutes**. Track all verbatims (`+"`cannibalization`"+`, `+"`junk leads`"+`, `+"`tagging`"+`) for dynamic template tailoring.
-• **Post-Camp SLA:** Resource dispatch and follow-ups must be archived and emailed within **24 hours**.
-• **Purge swept:** Closed camp recording videos are auto-purged after **90 days** unless safely moved to the GPEG Shared Drive folder!`;
+  } else if (q.includes('sop') || q.includes('workflow') || q.includes('process') || q.includes('playbook') || q.includes('rule') || q.includes('guide') || q.includes('step') || q.includes('persona') || q.includes('sla') || q.includes('conflict') || q.includes('rehearsal')) {
+    reply = `📚 **GPEG Command Center Complete Guide & Interactive Knowledge Hub:**
+
+*   **👥 Persona Matrix (Switch Header Dropdown):**
+    *   *Presenter:* Runs workshops, logs technical Q&A, views utilization logs.
+    *   *AM:* Scopes to active client portfolio, submits Discovery & post-camp CSAT feedback.
+    *   *PM:* Scopes to expert PM Escalation Queue to resolve technical Buganizer tickets.
+    *   *Organizer:* Operations lead. Manages pipeline Kanban boards, schedules kickoff dates, and track KPIs.
+    *   *Admin:* Diagnostics hub. Handles Spanner databases and cloud deployments.
+
+*   **🔄 E2E Demo Walkthrough (6 Steps):**
+    1. *Nominate:* (Admin/Organizer) - Cases Connect Sandbox tab. Submit Zenith media ticket.
+    2. *Kickoff:* (Organizer) - Presenter Dashboard. Set date, presenter (Taylor Chen), modular agenda.
+    3. *Discovery:* (AM) - Agency Portal. Select Zenith and submit pre-camp discovery.
+    4. *In-Camp Workshop:* (Presenter) - Presenter Console. Run session, escalate technical questions to PM.
+    5. *Resolve:* (PM) - PM Escalation Queue. Sync answer directly to the case thread.
+    6. *Post-Camp SLA & CSAT:* (Organizer/AM) - Dispatch resource package, input CSAT rating & ARR uplift.
+
+*   **⚠️ SLA Time Machine (Sidebar):**
+    *   Allows skipping calendar parameters by **+2 or +5 days** to test SLA Countdown tracking.
+    *   *SLA Breach:* Outstanding discovery within **48 hours** triggers a P1 High SLA Warning and automatic AM email chases.
+
+*   **🗓️ Presenter Conflict Alarm:**
+    *   Weekly calendar grid flags red and alerts coordinators if a presenter is double-booked within a **90-minute window**.
+
+*   **🎤 AI Rehearsal Sandbox:**
+    *   Allows presenters to rehearse workshop scripts. The integrated AI Client Evaluator scores speech clarity and alignment!`;
   } else {
     isFallback = true;
   }
