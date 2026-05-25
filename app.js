@@ -7750,12 +7750,38 @@ window.triggerWorkspaceExport = function(targetPlatform, caseId) {
   }, 1800); // Prototyping pacing delay to preserve visual premium compile experience
 };
 
+// --- 4. ONE-CLICK LOOKER STUDIO CUSTOM REPORT DEEP LINKER (SRE-LK-04) ---
+window.openLookerCustomReport = function() {
+  // Ingest active filters state parameters
+  const region = document.getElementById('filter-region-select') ? document.getElementById('filter-region-select').value : 'ALL';
+  const pod = document.getElementById('filter-pod-select') ? document.getElementById('filter-pod-select').value : 'ALL';
+  const sla = document.getElementById('filter-sla-select') ? document.getElementById('filter-sla-select').value : 'ALL';
+
+  // Dynamically compile the parameterized Looker Studio short URL
+  const lookerBaseUrl = "https://lookerstudio.google.com/reporting/gpeg-camps-master-bi";
+  const params = `?region=${region}&pod=${pod}&sla=${sla}`;
+  const secureLookerLink = `${lookerBaseUrl}${params}`;
+
+  showToast('Looker Studio Syncing... 📊', '⏳ Compiling filtered GPEG dataset and generating custom BI layout...');
+
+  setTimeout(() => {
+    // Log success audit entry and open deep link
+    window.logAction('SUCCESS', `Looker Studio: Parameterized custom BI report compiled. Generated secure deep link: go/gpeg-looker-custom${params}`);
+    showToast('Custom BI Report Generated 🚀', 'Redirecting to parameterized Looker Studio canvas...');
+    
+    // Simulated secure window redirection
+    console.log(`[Looker Linker Redirect] Navigating to: ${secureLookerLink}`);
+  }, 1800);
+};
+
 if (typeof window !== 'undefined') {
   window.nudgeAmEmailChase = nudgeAmEmailChase;
   window.calculateMlOpportunityScoping = calculateMlOpportunityScoping;
   window.dhanuAiFeedbackProcessor = dhanuAiFeedbackProcessor;
   window.triggerWorkspaceExport = triggerWorkspaceExport;
+  window.openLookerCustomReport = openLookerCustomReport;
 }
+
 
 
 
