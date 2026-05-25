@@ -3632,7 +3632,13 @@ window.postSupportMessage = function(text) {
     state.consecutiveFailuresCount = (state.consecutiveFailuresCount || 0) + 1;
     
     if (state.consecutiveFailuresCount === 1) {
-      reply = `Hi there! I didn't quite match that command. As a *${activeRole}*, would you like me to guide you contextually? Try asking me to *'switch tab to calendar'* or ask about *'deletion policies'*!`;
+      reply = `I want to make sure you get exactly what you need! As a **${activeRole}**, here is how I can help you right now:
+• Ask me about **"SOP"** or **"Workflow"** to see the step-by-step GPEG playbook.
+• Ask about **"SLA"** or **"Warnings"** to review active pipeline threats.
+• Type **"deletion policies"** to understand video sweeps.
+• Or simply say **"switch tab to calendar"** to hop over to the calendar!
+
+What can I assist you with?`;
     } else if (state.consecutiveFailuresCount === 2) {
       reply = `✨ **GPEG Proactive Assist**: It looks like you might be feeling a bit lost. Don't worry! Here are the most common actions for a *${activeRole}* in GPEG. Just click on any of the options below to get back on track:`;
       
