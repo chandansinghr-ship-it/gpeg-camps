@@ -4422,7 +4422,7 @@ window.submitChatBotMessage = function() {
     const q = query.toLowerCase();
 
     if (q.includes('help')) {
-      replyText = "I support these commands:\n• `@GPEG-Bot critical` (scan active pipeline for critical bottlenecks)\n• `@GPEG-Bot status <agency>` (check case stage)\n• `@GPEG-Bot active` (count active pipeline cases)\n• `@GPEG-Bot alerts` (count SLA warnings)\n• `@GPEG-Bot schedule` (list scheduled Gcal sessions)\n• `@GPEG-Bot link <case_id>` (fetch discovery profile survey links)\n• `@GPEG-Bot resolve <bug_id> \"<answer>\"` (directly resolve Buganizer tickets)";
+      replyText = "I support these commands:\n• `@GPEG-Bot playbook` (access GPEG standard operational workflows and guidelines)\n• `@GPEG-Bot critical` (scan active pipeline for critical bottlenecks)\n• `@GPEG-Bot status <agency>` (check case stage)\n• `@GPEG-Bot active` (count active pipeline cases)\n• `@GPEG-Bot alerts` (count SLA warnings)\n• `@GPEG-Bot schedule` (list scheduled Gcal sessions)\n• `@GPEG-Bot link <case_id>` (fetch discovery profile survey links)\n• `@GPEG-Bot resolve <bug_id> \"<answer>\"` (directly resolve Buganizer tickets)";
     } else if (q.includes('critical') || q.includes('action') || q.includes('attention')) {
       let criticalList = [];
 
@@ -4525,6 +4525,26 @@ window.submitChatBotMessage = function() {
       } else {
         replyText = "@GPEG-Bot Error: Could not find any active camp matching that agency name keyword. Try `@GPEG-Bot status groupm`.";
       }
+    } else if (q.includes('sop') || q.includes('workflow') || q.includes('process') || q.includes('playbook') || q.includes('rule')) {
+      replyText = `📚 **GPEG Standard Operational Playbook (SOP) & Guideline Hub:**
+
+*   **1. Pre-Camp Phase (Discovery & Tailoring):**
+    *   *AE Discovery Timeline:* Secure discovery responses within **3 days** of nomination.
+    *   *SLA Breach:* Discovery outstanding within **48 hours** of kickoff triggers a \`P1 High\` SLA Warning. The AM is prompted to send a *⚡ Nudge AM* chase, and customization rights are revoked.
+    *   *Dynamic Customization (Verbatim Matching):*
+        *   *"cannibalization"* ➔ Ingests *Brand Suitability & Negative Keywords Shield*
+        *   *"junk leads"* ➔ Ingests *Lead Gen Optimization & Advanced Filters*
+        *   *"tagging"* ➔ Ingests *Server-Side Google Tag Gateway 201*
+
+*   **2. In-Camp Phase (Interactive Delivery):**
+    *   *Workshop Duration:* 60-90 minute workshops.
+    *   *Live Q&A:* Presenters must log real-time queries in the Live Q&A Console.
+    *   *Escalations:* Complex technical issues must be logged into the Buganizer Queue for PM review.
+
+*   **3. Post-Camp Phase (Archive & Follow-up):**
+    *   *Follow-up SLA:* Archive and dispatch resources within **24 hours** of workshop delivery.
+    *   *Recording Sweeps:* Move closed camp recordings to the GPEG Shared Drive (\`⌥ Move to Shared Drive\`) to bypass the automatic **90-day sweep deletion**.
+    *   *Exporting:* Sync closed records to GMaster Sheets via one-click exporters.`;
     }
 
     state.chatBotMessages.push({ sender: 'bot', text: replyText });
