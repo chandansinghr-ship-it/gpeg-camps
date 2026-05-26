@@ -66,6 +66,11 @@ const WIP_LIMITS = {
   closed: 99999
 };
 
+// --- KANBAN INFINITE SCROLL & PAGINATION ---
+let columnPages = { nomination: 1, 'pre-camp': 1, 'in-camp': 1, 'post-camp': 1, closed: 1 };
+const PAGE_SIZE = 10;
+
+
 // --- PREDICTIVE SLA BREACH RISK ESTIMATOR (Simulated ML Scoring) ---
 function calculateSlaRisk(camp) {
   if (camp.stage === 'closed') return { label: 'Low', color: 'var(--g-border)', score: 0, badgeClass: 'sla-neutral' };
@@ -638,8 +643,8 @@ function renderDashboard() {
   const statsBadge = document.getElementById('portfolio-stats-badge');
   if (statsBadge) statsBadge.textContent = `${visibleCamps.length} shown`;
 
+  // Apply dynamic pipeline status-to-stage correction to all camps first
   visibleCamps.forEach(camp => {
-    // Dynamic pipeline status-to-stage correction logic
     if (camp.status === "Pending Kickoff" || camp.status === "Nominated" || camp.status === "Proposed") {
       camp.stage = "nomination";
     } else if (camp.status === "Awaiting Discovery" || camp.status === "Discovery Received" || camp.status === "Discovery Submitted" || camp.status === "Awaiting Discovery Form" || camp.status === "Discovery Received") {
@@ -651,132 +656,167 @@ function renderDashboard() {
     } else if (camp.status === "Impact Logged" || camp.status.includes("Closed") || camp.status.includes("Cancelled") || camp.status.includes("Postponed")) {
       camp.stage = "closed";
     }
-
-    counts[camp.stage]++;
-
-
-    // Metrics BFM calculator
-    if (camp.stage === 'closed' && camp.bfmUplift !== null) {
-      totalBfmUplift += camp.bfmUplift;
-      closedCampsCount++;
-    }
-
-    // SLA Check
-    let isSlaWarning = false;
-    if (camp.stage === 'pre-camp' && camp.slaDaysRemaining !== null && camp.slaDaysRemaining <= 3) {
-      isSlaWarning = true;
-    } else if (camp.stage === 'post-camp' && !camp.followUpSent) {
-      isSlaWarning = true;
-    }
-
-    if (isSlaWarning) {
-      slaAlertCount++;
-    }
-
-    const cardHtml = `
-      <div class="camp-card ${isSlaWarning ? 'sla-alert' : ''}" data-id="${camp.id}" draggable="true" ondragstart="window.handleDragStart(event)">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-          <span class="card-case-id-tag" onclick="window.copyCaseIdToClipboard(event, '${camp.id}')" title="Click to copy Case ID" style="font-size: 0.72rem; font-weight: 800; color: var(--primary-cyan); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 0.15rem;">
-            <span>Case #${camp.id.length > 12 ? camp.id.substring(0, 8) : camp.id}</span>
-            <span class="copy-icon-hover" style="font-size: 0.6rem; opacity: 0.5; display: none;">📋</span>
-          </span>
-          <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; ${getRegionStyle(camp.region)}">${camp.region || 'EMEA'}</span>
-        </div>
-        <div class="card-agency" style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">${camp.agency}</div>
-        <span class="card-product">${camp.product}</span>
-        
-        <div class="card-meta">
-          <div class="card-meta-item">
-            <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <span>AM: ${camp.amEmail.split('@')[0]}</span>
-          </div>
-          ${camp.presenter ? `
-            <div class="card-meta-item">
-              <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              <span>Presenter: ${camp.presenter.split(' ')[0]}</span>
-            </div>
-          ` : ''}
-          ${camp.scheduledTime ? `
-            <div class="card-meta-item">
-              <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-              <span>${new Date(camp.scheduledTime).toLocaleDateString()} at ${new Date(camp.scheduledTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
-            </div>
-          ` : ''}
-        </div>
-
-        ${camp.stage === 'closed' ? `
-          <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
-            ${camp.recordingDeleted ? `
-              <span class="ws-sync-pill" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.25); color: var(--danger-red); cursor: default;">⚙ Purged (SLA)</span>
-            ` : camp.recordingArchived ? `
-              <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green); display: inline-flex; align-items: center; gap: 0.25rem;" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95A5.497 5.497 0 0 1 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11A2.98 2.98 0 0 1 22 15c0 1.66-1.34 3-3 3z" fill="#10b981"/></svg>
-                <span>Archived Drive</span>
-              </span>
-            ` : `
-              <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
-                <span>Move to Shared Drive</span>
-              </span>
-            `}
-            <span class="ws-sync-pill ws-synced" onclick="window.triggerWorkspaceExport('Sheets', '${camp.id}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click export this closed case history to Google Sheets.">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-2v-4H7v-2h3v-4h2v4h4v2z" fill="#10b981"/></svg>
-              <span>Sheets Synced</span>
-            </span>
-          </div>
-        ` : camp.stage === 'post-camp' ? `
-          <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
-            <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
-              <span>Drive Sync</span>
-            </span>
-            <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#2b6cb0"/></svg>
-              <span>Doc Sync</span>
-            </span>
-            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Slides', '${camp.id}')" style="cursor: pointer; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--warning-amber); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click generate Gslides presentation pre-reads stripping Internal slides.">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11H6v-2h12v2zm0-4H6V8h12v2z" fill="#d69e2e"/></svg>
-              <span>Slides Exporter</span>
-            </span>
-          </div>
-        ` : `
-          <div style="margin-top: 0.35rem; display: flex; gap: 0.25rem;">
-            <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Chat', '${camp.id}')" style="cursor: pointer; background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.2); color: var(--accent-purple); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click format and broadcast this active camp card payload directly into internal Google Chat Space.">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="#8b5cf6"/></svg>
-              <span>Share to Chat</span>
-            </span>
-          </div>
-        `}
-
-
-
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
-          <span class="badge-deck-status ${camp.deckType === 'Customized Deck' ? 'badge-deck-custom' : ''}">${camp.deckType}</span>
-          ${camp.slaDaysRemaining !== null && camp.stage !== 'closed' ? `
-            <span class="badge-sla" style="font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; ${
-              camp.slaDaysRemaining <= 0 || camp.slaBreached
-                ? 'background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--danger-red);'
-                : camp.slaDaysRemaining <= 2
-                ? 'background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--warning-amber);'
-                : 'background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success-green);'
-            }">
-              ⏱️ ${camp.slaDaysRemaining}d left
-            </span>
-          ` : ''}
-          <span class="badge-status" style="background: ${getStageBadgeColor(camp.status)}; color: #fff;">${camp.status}</span>
-        </div>
-
-        <div class="card-actions">
-          ${getActionButton(camp)}
-        </div>
-      </div>
-    `;
-
-    if (cols[camp.stage]) {
-      cols[camp.stage].insertAdjacentHTML('beforeend', cardHtml);
-    }
   });
+
+  // Group and render paginated cards per stage column
+  Object.entries(cols).forEach(([stage, el]) => {
+    if (!el) return;
+    
+    const stageCamps = visibleCamps.filter(c => c.stage === stage);
+    counts[stage] = stageCamps.length;
+
+    const limit = columnPages[stage] * PAGE_SIZE;
+    const campsToRender = stageCamps.slice(0, limit);
+
+    campsToRender.forEach(camp => {
+      // Metrics BFM calculator
+      if (camp.stage === 'closed' && camp.bfmUplift !== null) {
+        totalBfmUplift += camp.bfmUplift;
+        closedCampsCount++;
+      }
+
+      // SLA Check
+      let isSlaWarning = false;
+      if (camp.stage === 'pre-camp' && camp.slaDaysRemaining !== null && camp.slaDaysRemaining <= 3) {
+        isSlaWarning = true;
+      } else if (camp.stage === 'post-camp' && !camp.followUpSent) {
+        isSlaWarning = true;
+      }
+
+      if (isSlaWarning) {
+        slaAlertCount++;
+      }
+
+      const cardHtml = `
+        <div class="camp-card ${isSlaWarning ? 'sla-alert' : ''}" data-id="${camp.id}" draggable="true" ondragstart="window.handleDragStart(event)">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+            <span class="card-case-id-tag" onclick="window.copyCaseIdToClipboard(event, '${camp.id}')" title="Click to copy Case ID" style="font-size: 0.72rem; font-weight: 800; color: var(--primary-cyan); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 0.15rem;">
+              <span>Case #${camp.id.length > 12 ? camp.id.substring(0, 8) : camp.id}</span>
+            </span>
+            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; ${getRegionStyle(camp.region)}">${camp.region || 'EMEA'}</span>
+          </div>
+          <div class="card-agency" style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">${camp.agency}</div>
+          <span class="card-product">${camp.product}</span>
+          
+          <div class="card-meta">
+            <div class="card-meta-item">
+              <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>AM: ${camp.amEmail.split('@')[0]}</span>
+            </div>
+            ${camp.presenter ? `
+              <div class="card-meta-item">
+                <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <span>Presenter: ${camp.presenter.split(' ')[0]}</span>
+              </div>
+            ` : ''}
+            ${camp.scheduledTime ? `
+              <div class="card-meta-item">
+                <svg role="img" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span>${new Date(camp.scheduledTime).toLocaleDateString()} at ${new Date(camp.scheduledTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+              </div>
+            ` : ''}
+          </div>
+
+          ${camp.stage === 'closed' ? `
+            <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
+              ${camp.recordingDeleted ? `
+                <span class="ws-sync-pill" style="background: rgba(220, 38, 38, 0.1); border-color: rgba(220, 38, 38, 0.25); color: var(--danger-red); cursor: default;">⚙ Purged (SLA)</span>
+              ` : camp.recordingArchived ? `
+                <span class="ws-sync-pill ws-synced" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.25); color: var(--success-green); display: inline-flex; align-items: center; gap: 0.25rem;" title="Safely archived inside gPEG Shared Drive folder, protected from auto-deletion.">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM19 18H6c-2.21 0-4-1.79-4-4 0-2.05 1.53-3.76 3.56-3.97l1.07-.11.5-.95A5.497 5.497 0 0 1 12 6c2.62 0 4.88 1.86 5.39 4.43l.3 1.5 1.53.11A2.98 2.98 0 0 1 22 15c0 1.66-1.34 3-3 3z" fill="#10b981"/></svg>
+                  <span>Archived Drive</span>
+                </span>
+              ` : `
+                <span class="ws-sync-pill" id="ws-archive-drive-${camp.id}" onclick="window.archiveToSharedDrive('${camp.id}', 'ws-archive-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;" title="Archive this recording to Google Shared Drive to protect it from auto-deletion after 3 months.">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
+                  <span>Move to Shared Drive</span>
+                </span>
+              `}
+              <span class="ws-sync-pill ws-synced" onclick="window.triggerWorkspaceExport('Sheets', '${camp.id}')" style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click export this closed case history to Google Sheets.">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11h-4v4h-2v-4H7v-2h3v-4h2v4h4v2z" fill="#10b981"/></svg>
+                <span>Sheets Synced</span>
+              </span>
+            </div>
+          ` : camp.stage === 'post-camp' ? `
+            <div style="margin-top: 0.35rem; display: flex; flex-wrap: wrap; gap: 0.25rem;">
+              <span class="ws-sync-pill" id="ws-sync-drive-${camp.id}" onclick="window.syncToWorkspace('Drive', '${camp.id}', 'ws-sync-drive-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19.35 10.04A7.49 7.49 0 0 0 12 4C9.11 4 6.6 5.64 5.35 8.04A5.994 5.994 0 0 0 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z" fill="#64748b"/></svg>
+                <span>Drive Sync</span>
+              </span>
+              <span class="ws-sync-pill" id="ws-sync-doc-${camp.id}" onclick="window.syncToWorkspace('Docs', '${camp.id}', 'ws-sync-doc-${camp.id}')" style="display: inline-flex; align-items: center; gap: 0.25rem;">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#2b6cb0"/></svg>
+                <span>Doc Sync</span>
+              </span>
+              <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Slides', '${camp.id}')" style="cursor: pointer; background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.2); color: var(--warning-amber); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click generate Gslides presentation pre-reads stripping Internal slides.">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 11H6v-2h12v2zm0-4H6V8h12v2z" fill="#d69e2e"/></svg>
+                <span>Slides Exporter</span>
+              </span>
+            </div>
+          ` : `
+            <div style="margin-top: 0.35rem; display: flex; gap: 0.25rem;">
+              <span class="ws-sync-pill" onclick="window.triggerWorkspaceExport('Chat', '${camp.id}')" style="cursor: pointer; background: rgba(139,92,246,0.1); border-color: rgba(139,92,246,0.2); color: var(--accent-purple); display: inline-flex; align-items: center; gap: 0.25rem;" title="One-Click format and broadcast this active camp card payload directly into internal Google Chat Space.">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z" fill="#8b5cf6"/></svg>
+                <span>Share to Chat</span>
+              </span>
+            </div>
+          `}
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.25rem;">
+            <span class="badge-deck-status ${camp.deckType === 'Customized Deck' ? 'badge-deck-custom' : ''}">${camp.deckType}</span>
+            ${camp.slaDaysRemaining !== null && camp.stage !== 'closed' ? `
+              <span class="badge-sla" style="font-size: 0.68rem; font-weight: 700; padding: 0.15rem 0.45rem; border-radius: 4px; text-transform: uppercase; letter-spacing: 0.3px; ${
+                camp.slaDaysRemaining <= 0 || camp.slaBreached
+                  ? 'background: rgba(248, 113, 113, 0.15); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--danger-red);'
+                  : camp.slaDaysRemaining <= 2
+                  ? 'background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.3); color: var(--warning-amber);'
+                  : 'background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.3); color: var(--success-green);'
+              }">
+                ⏱️ ${camp.slaDaysRemaining}d left
+              </span>
+            ` : ''}
+            <span class="badge-status" style="background: ${getStageBadgeColor(camp.status)}; color: #fff;">${camp.status}</span>
+          </div>
+
+          <div class="card-actions">
+            ${getActionButton(camp)}
+          </div>
+        </div>
+      `;
+
+      el.insertAdjacentHTML('beforeend', cardHtml);
+    });
+
+    // Append premium dynamic Infinite Scroll trigger button if more cards remain
+    if (stageCamps.length > campsToRender.length) {
+      const loadTriggerHtml = `
+        <div class="infinite-scroll-trigger" style="text-align: center; padding: 0.6rem; color: var(--primary-cyan); font-size: 0.68rem; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; border: 1px dashed var(--primary-cyan-dim); border-radius: 8px; margin-top: 0.55rem; background: rgba(0, 233, 255, 0.02); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.3rem; transition: all 0.2s;" onclick="window.loadNextColumnPage('${stage}')">
+          <span>🔄 Click to Load More (${stageCamps.length - campsToRender.length} remaining)</span>
+        </div>
+      `;
+      el.insertAdjacentHTML('beforeend', loadTriggerHtml);
+    }
+
+    // Bind scroll listener for automated infinite pagination
+    el.onscroll = function() {
+      if (el.scrollHeight - el.scrollTop <= el.clientHeight + 40) {
+        const currentTotal = visibleCamps.filter(c => c.stage === stage).length;
+        const currentLoaded = columnPages[stage] * PAGE_SIZE;
+        if (currentTotal > currentLoaded) {
+          columnPages[stage]++;
+          renderDashboard();
+          showToast('Infinite Scroll', `Loaded next page of campaigns in column [${stage}]`);
+        }
+      }
+    };
+  });
+
+  // Window global function to load next page on manual click
+  window.loadNextColumnPage = function(stage) {
+    columnPages[stage]++;
+    renderDashboard();
+    showToast('Page Ingested', `Loaded more campaigns in column [${stage}]`);
+  };
+
 
   // Update column count headers and enforce WIP limits
   Object.keys(counts).forEach(stage => {
