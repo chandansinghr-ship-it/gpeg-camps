@@ -639,7 +639,21 @@ function renderDashboard() {
   if (statsBadge) statsBadge.textContent = `${visibleCamps.length} shown`;
 
   visibleCamps.forEach(camp => {
+    // Dynamic pipeline status-to-stage correction logic
+    if (camp.status === "Pending Kickoff" || camp.status === "Nominated" || camp.status === "Proposed") {
+      camp.stage = "nomination";
+    } else if (camp.status === "Awaiting Discovery" || camp.status === "Discovery Received" || camp.status === "Discovery Submitted" || camp.status === "Awaiting Discovery Form" || camp.status === "Discovery Received") {
+      camp.stage = "pre-camp";
+    } else if (camp.status === "Live Session Active" || camp.status === "Live Session Scheduled") {
+      camp.stage = "in-camp";
+    } else if (camp.status === "Resolving Queries" || camp.status === "Resolving Queries & Follow-up" || camp.status === "Resolving Q&A") {
+      camp.stage = "post-camp";
+    } else if (camp.status === "Impact Logged" || camp.status.includes("Closed") || camp.status.includes("Cancelled") || camp.status.includes("Postponed")) {
+      camp.stage = "closed";
+    }
+
     counts[camp.stage]++;
+
 
     // Metrics BFM calculator
     if (camp.stage === 'closed' && camp.bfmUplift !== null) {
