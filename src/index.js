@@ -1,10 +1,12 @@
 // 🚀 GPEG Camps Command Center - E2E Bootstrapper Entry Point
 
-// 1. Import legacy core script first (Loads all legacy functions into window/scope)
+// 1. Import modern decoupled state module first (Binds window.state immediately)
+import { state, initState } from './modules/core/state.js';
+
+// 2. Import legacy core script (Loads legacy functions sharing window.state)
 import '../app.js';
 
-// 2. Import modern decoupled modules to overlay and overwrite legacy methods
-import { state, initState } from './modules/core/state.js';
+// 3. Import other modern decoupled modules
 import { performBackendLogin, syncWithServer, syncRosterWithAppSheet, startPolling } from './modules/services/api.js';
 import { renderDashboard, showToast } from './modules/ui/renderer.js';
 

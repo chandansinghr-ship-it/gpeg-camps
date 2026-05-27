@@ -2,60 +2,7 @@ import { initialCamps, initialLogs, initialTasks, initialChats, initialTemplates
 
 // --- STATE MANAGEMENT ---
 let currentSessionToken = localStorage.getItem('gpeg_session_token') || '';
-let state = {
-  camps: [],
-  outbox: [],
-  logs: [],
-  tasks: [],
-  chats: [],
-  teamRoster: [],
-  weeklyUtilization: [],
-  effortLogs: [],
-  activeRole: "Presenter",
-  authenticatedAgencyCaseId: null,
-  simulatedTime: "2026-05-18T14:34:38Z",
-  selectedAnalyticsRegion: null,
-  mosCamps: [],
-  mosTopics: [],
-  
-  // UX Refactoring Extensions
-  simulatorModeActive: true,
-  activityLogPage: 1,
-  actionCenterPage: 1,
-  actionCenterSortField: 'priority',
-  actionCenterSortAsc: true,
-  actionCenterFilterRole: 'ALL',
-  actionCenterFilterCategory: 'ALL',
-  actionCenterSearchQuery: '',
-  
-  // GPP UIF & Material Design 3 Extensions
-  appTheme: 'system',
-  navRailCollapsed: false,
-
-  // Phase 5 Matrix Portfolio Filters
-  matrixFilters: {
-    suite: 'ALL',
-    goal: 'ALL',
-    segment: 'ALL',
-    level: 'ALL',
-    holding: 'ALL',
-    customization: 'ALL'
-  },
-
-  // Step 2.5: Daily Action Hub & Collaboration Workspace State
-  dailyTasks: [],
-  workspaceAssets: [],
-  activeInvitations: [],
-  dryRuns: [],
-
-  // Automation & Integration Hub Extensions
-  chatBotMessages: [
-    { sender: 'bot', text: 'Hi GPEG delivery team! I am your Google ChatOps @GPEG-Bot. Ask me about case status, active campaigns, or SLA warnings!' }
-  ],
-  buganizerTickets: [
-    { id: '38291002', caseId: '4-9901000031200', title: 'S2S API Custom Variables Mapping', status: 'Open', component: 'gpeg-camps-cm360', desc: 'Live escalated: Can custom Floodlights be passed via S2S API without a web tag?', answer: '' }
-  ]
-};
+const state = window.state;
 
 // --- KANBAN COLUMN WIP BOTTLENECK LIMITS ---
 const WIP_LIMITS = {

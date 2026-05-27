@@ -55,7 +55,13 @@ export let state = {
   dailyTasks: [],
   workspaceAssets: [],
   activeInvitations: [],
-  dryRuns: []
+  dryRuns: [],
+
+  // Chatbot & Buganizer Extensions
+  chatBotMessages: [
+    { sender: 'bot', text: 'Hi GPEG delivery team! I am your Google ChatOps @GPEG-Bot. Ask me about case status, active campaigns, or SLA warnings!' }
+  ],
+  buganizerTickets: []
 };
 
 // Bind to window immediately for global backward-compatibility with existing scripts
@@ -218,6 +224,16 @@ export function initState() {
   state.mosCamps = [...mosCamps];
   state.mosTopics = [...mosTopics];
 
+  const savedTickets = localStorage.getItem('gpeg_buganizer_tickets');
+  if (savedTickets) {
+    state.buganizerTickets = JSON.parse(savedTickets);
+  } else {
+    state.buganizerTickets = [
+      { id: '38291002', caseId: '4-9901000031200', title: 'S2S API Custom Variables Mapping', status: 'Open', component: 'gpeg-camps-cm360', desc: 'Live escalated: Can custom Floodlights be passed via S2S API without a web tag?', answer: '' }
+    ];
+    localStorage.setItem('gpeg_buganizer_tickets', JSON.stringify(state.buganizerTickets));
+  }
+
   // Run Automated Data Retention Cron on startup
   if (typeof window !== 'undefined') {
     if (window.runRetentionCron) window.runRetentionCron();
@@ -236,6 +252,7 @@ export function saveState() {
   localStorage.setItem('gpeg_logs', JSON.stringify(state.logs));
   localStorage.setItem('gpeg_tasks', JSON.stringify(state.tasks));
   localStorage.setItem('gpeg_chats', JSON.stringify(state.chats));
+  localStorage.setItem('gpeg_buganizer_tickets', JSON.stringify(state.buganizerTickets));
   localStorage.setItem('gpeg_team_roster', JSON.stringify(state.teamRoster));
   localStorage.setItem('gpeg_weekly_utilization', JSON.stringify(state.weeklyUtilization));
   localStorage.setItem('gpeg_effort_logs', JSON.stringify(state.effortLogs));
