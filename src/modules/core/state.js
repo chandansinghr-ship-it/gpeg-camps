@@ -78,14 +78,14 @@ export function initState() {
   const savedChats = localStorage.getItem('gpeg_chats');
   const savedRole = localStorage.getItem('gpeg_role');
 
-  if (savedCamps) {
+  if (savedCamps && JSON.parse(savedCamps).length > 0) {
     state.camps = JSON.parse(savedCamps);
   } else {
     state.camps = [...initialCamps];
     saveState();
   }
 
-  if (savedOutbox) {
+  if (savedOutbox && JSON.parse(savedOutbox).length > 0) {
     state.outbox = JSON.parse(savedOutbox);
   } else {
     state.outbox = [
@@ -103,21 +103,21 @@ export function initState() {
     saveState();
   }
 
-  if (savedLogs) {
+  if (savedLogs && JSON.parse(savedLogs).length > 0) {
     state.logs = JSON.parse(savedLogs);
   } else {
     state.logs = [...initialLogs];
     saveState();
   }
 
-  if (savedTasks) {
+  if (savedTasks && JSON.parse(savedTasks).length > 0) {
     state.tasks = JSON.parse(savedTasks);
   } else {
     state.tasks = [...initialTasks];
     saveState();
   }
 
-  if (savedChats) {
+  if (savedChats && JSON.parse(savedChats).length > 0) {
     state.chats = JSON.parse(savedChats);
   } else {
     state.chats = [...initialChats];
@@ -133,7 +133,7 @@ export function initState() {
 
   // Step 2.5: Daily Action Hub Seeds
   const savedDailyTasks = localStorage.getItem('gpeg_daily_tasks');
-  if (savedDailyTasks) {
+  if (savedDailyTasks && JSON.parse(savedDailyTasks).length > 0) {
     state.dailyTasks = JSON.parse(savedDailyTasks);
   } else {
     state.dailyTasks = [
@@ -184,7 +184,7 @@ export function initState() {
 
   // Restore or seed dynamic UI/UX Survey Feedback submissions
   const savedFeedbacks = localStorage.getItem('gpeg_survey_feedbacks');
-  if (savedFeedbacks) {
+  if (savedFeedbacks && JSON.parse(savedFeedbacks).length > 0) {
     state.surveyFeedbacks = JSON.parse(savedFeedbacks);
   } else {
     state.surveyFeedbacks = [
@@ -195,7 +195,7 @@ export function initState() {
 
   // Seeding or restoring Employee attendance roster
   const savedRoster = localStorage.getItem('gpeg_team_roster');
-  if (savedRoster) {
+  if (savedRoster && JSON.parse(savedRoster).length > 0) {
     state.teamRoster = JSON.parse(savedRoster);
   } else {
     state.teamRoster = [...initialTeamRoster];
@@ -204,7 +204,7 @@ export function initState() {
 
   // Seeding or restoring Weekly Utilization Hours logs
   const savedUtil = localStorage.getItem('gpeg_weekly_utilization');
-  if (savedUtil) {
+  if (savedUtil && JSON.parse(savedUtil).length > 0) {
     state.weeklyUtilization = JSON.parse(savedUtil);
   } else {
     state.weeklyUtilization = [...initialWeeklyUtilization];
@@ -213,7 +213,7 @@ export function initState() {
 
   // Seeding or restoring Granular Task Effort Logs
   const savedEffort = localStorage.getItem('gpeg_effort_logs');
-  if (savedEffort) {
+  if (savedEffort && JSON.parse(savedEffort).length > 0) {
     state.effortLogs = JSON.parse(savedEffort);
   } else {
     state.effortLogs = [...initialEffortLogs];
