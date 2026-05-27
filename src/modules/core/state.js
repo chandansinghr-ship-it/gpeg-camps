@@ -9,7 +9,7 @@ import {
   initialEffortLogs, 
   mosCamps, 
   mosTopics 
-} from '../../data.js';
+} from '../../../data.js';
 
 export let state = {
   camps: [],
