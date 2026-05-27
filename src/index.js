@@ -1,5 +1,4 @@
 // 🚀 GPEG Camps Command Center - E2E Bootstrapper Entry Point
-import '../style.css';
 
 // 1. Import legacy core script first (Loads all legacy functions into window/scope)
 import '../app.js';
