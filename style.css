@@ -445,6 +445,18 @@ main {
   100% { box-shadow: 0 0 0 0 rgba(255, 170, 0, 0); }
 }
 
+.happening-today {
+  border-color: rgba(0, 233, 255, 0.5) !important;
+  box-shadow: 0 0 10px rgba(0, 233, 255, 0.15) !important;
+  background: linear-gradient(to bottom, var(--surface-card), rgba(0, 233, 255, 0.03)) !important;
+}
+
+@keyframes pulseHighlight {
+  0% { box-shadow: 0 0 0 0 rgba(0, 233, 255, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 233, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 233, 255, 0); }
+}
+
 .badge-status {
   font-size: 0.7rem;
   font-weight: 600;

@@ -71,6 +71,24 @@ let columnPages = { nomination: 1, 'pre-camp': 1, 'in-camp': 1, 'post-camp': 1, 
 const PAGE_SIZE = 10;
 
 
+// --- TODAY'S CAMPS HELPERS ---
+function isCampToday(camp) {
+  if (!camp.scheduledTime) return false;
+  const campDate = new Date(camp.scheduledTime).toDateString();
+  const simDate = new Date(state.simulatedTime).toDateString();
+  return campDate === simDate;
+}
+
+window.focusOnCampCard = function(caseId) {
+  window.switchTab('pipeline');
+  const card = document.querySelector(`.camp-card[data-id="${caseId}"]`);
+  if (card) {
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.style.animation = 'pulseHighlight 1.5s ease-in-out 2';
+  }
+};
+
+
 // --- PREDICTIVE SLA BREACH RISK ESTIMATOR (Simulated ML Scoring) ---
 function calculateSlaRisk(camp) {
   if (camp.stage === 'closed') return { label: 'Low', color: 'var(--g-border)', score: 0, badgeClass: 'sla-neutral' };
@@ -639,6 +657,12 @@ function renderDashboard() {
     });
   }
 
+  // 4.5. Time Filter (Today's Camps)
+  const filterTime = document.getElementById('filter-time-select') ? document.getElementById('filter-time-select').value : 'ALL';
+  if (filterTime === 'TODAY') {
+    visibleCamps = visibleCamps.filter(c => isCampToday(c));
+  }
+
   // 5. Update the Portfolio scope stats badge
   const statsBadge = document.getElementById('portfolio-stats-badge');
   if (statsBadge) statsBadge.textContent = `${visibleCamps.length} shown`;
@@ -687,13 +711,18 @@ function renderDashboard() {
         slaAlertCount++;
       }
 
+      const isToday = isCampToday(camp);
+
       const cardHtml = `
-        <div class="camp-card ${isSlaWarning ? 'sla-alert' : ''}" data-id="${camp.id}" draggable="true" ondragstart="window.handleDragStart(event)">
+        <div class="camp-card ${isSlaWarning ? 'sla-alert' : ''} ${isToday ? 'happening-today' : ''}" data-id="${camp.id}" draggable="true" ondragstart="window.handleDragStart(event)">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
             <span class="card-case-id-tag" onclick="window.copyCaseIdToClipboard(event, '${camp.id}')" title="Click to copy Case ID" style="font-size: 0.72rem; font-weight: 800; color: var(--primary-cyan); text-transform: uppercase; letter-spacing: 0.5px; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 0.15rem;">
               <span>Case #${camp.id.length > 12 ? camp.id.substring(0, 8) : camp.id}</span>
             </span>
-            <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; ${getRegionStyle(camp.region)}">${camp.region || 'EMEA'}</span>
+            <div style="display: flex; gap: 0.25rem; align-items: center;">
+              ${isToday ? `<span style="font-size: 0.6rem; font-weight: 800; padding: 0.1rem 0.35rem; border-radius: 4px; background: rgba(0, 233, 255, 0.15); color: var(--primary-cyan); border: 1px solid rgba(0, 233, 255, 0.3); text-transform: uppercase; letter-spacing: 0.5px;">Today</span>` : ''}
+              <span style="font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.35rem; border-radius: 4px; ${getRegionStyle(camp.region)}">${camp.region || 'EMEA'}</span>
+            </div>
           </div>
           <div class="card-agency" style="font-size: 1.05rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.25rem;">${camp.agency}</div>
           <span class="card-product">${camp.product}</span>
@@ -865,6 +894,11 @@ function renderDashboard() {
   // Update Consolidated Sidebar Quick Action Widget
   if (window.renderConsolidatedSidebarWidget) {
     window.renderConsolidatedSidebarWidget();
+  }
+
+  // Render Happening Today Sidebar Panel
+  if (typeof renderSidebarTodaysSessions === 'function') {
+    renderSidebarTodaysSessions();
   }
 
   // Enhanced features rendering hooks
@@ -7920,12 +7954,49 @@ window.loadGpegAgentSkill = function(skillName) {
   showToast('Agent Skill Loaded 🤖', `Playbook skills/${skillName}.md successfully mounted!`);
 };
 
+function renderSidebarTodaysSessions() {
+  const listEl = document.getElementById('sidebar-today-list');
+  const badgeEl = document.getElementById('sidebar-today-count-badge');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  const todaysCamps = state.camps.filter(c => isCampToday(c));
+  
+  todaysCamps.forEach(camp => {
+    listEl.insertAdjacentHTML('beforeend', `
+      <div class="sidebar-item" style="border-left: 3px solid var(--primary-cyan);">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 0.25rem; margin-bottom: 0.15rem;">
+          <span class="sidebar-item-title" style="font-size: 0.75rem; font-weight: 600; cursor: pointer; color: var(--primary-cyan);" onclick="window.focusOnCampCard('${camp.id}')">${camp.agency}</span>
+          <span class="badge-status" style="font-size: 0.55rem; padding: 0.05rem 0.2rem; border-radius: 3px; background: ${getStageBadgeColor(camp.status)}; color: #fff;">${camp.status}</span>
+        </div>
+        <div class="sidebar-item-meta" style="font-size: 0.68rem; display: flex; justify-content: space-between;">
+          <span>${camp.product}</span>
+          <span class="alert-timer" style="color: var(--primary-cyan);">⏱️ ${new Date(camp.scheduledTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+        </div>
+      </div>
+    `);
+  });
+
+  if (todaysCamps.length === 0) {
+    listEl.innerHTML = `
+      <div style="font-size: 0.75rem; color: var(--text-muted); text-align: center; padding: 1rem; background: rgba(255,255,255,0.01); border: 1px dashed var(--border-light); border-radius: 8px;">
+        No sessions scheduled for today.
+      </div>
+    `;
+  }
+
+  if (badgeEl) {
+    badgeEl.textContent = `${todaysCamps.length} ${todaysCamps.length === 1 ? 'Session' : 'Sessions'}`;
+  }
+}
+
 if (typeof window !== 'undefined') {
   window.nudgeAmEmailChase = nudgeAmEmailChase;
   window.calculateMlOpportunityScoping = calculateMlOpportunityScoping;
   window.dhanuAiFeedbackProcessor = dhanuAiFeedbackProcessor;
   window.triggerWorkspaceExport = triggerWorkspaceExport;
   window.openLookerCustomReport = openLookerCustomReport;
+  window.renderSidebarTodaysSessions = renderSidebarTodaysSessions;
   window.getShardedPresenter = getShardedPresenter;
   window.triggerPerfettoTrace = triggerPerfettoTrace;
   window.loadGpegAgentSkill = loadGpegAgentSkill;

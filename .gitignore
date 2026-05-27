@@ -10,3 +10,8 @@
 !agent_heartbeat_guard.sh
 !simulate_tests.py
 !.gitignore
+!package.json
+!webpack.config.js
+!.babelrc
+!src/
+!src/**

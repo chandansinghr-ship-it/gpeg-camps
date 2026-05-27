@@ -245,7 +245,7 @@ export const initialCamps = [
     discoveryStatus: "Pending",
     discoveryData: null,
     deckType: "Standard Deck",
-    scheduledTime: "2026-06-15T10:00:00Z",
+    scheduledTime: "2026-05-18T10:00:00Z",
     presenter: "Taylor Chen (Presenter)",
     liveQuestions: [],
     followUpSent: false,
