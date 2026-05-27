@@ -1122,20 +1122,16 @@ window.triggerConnectTicketCreation = async function() {
 
   try {
     // Dynamic browser-side cryptographic signing
-    const signature = await calculateHmacSha256("connect_signature_key_2026", payloadString);
-
     const consoleEl = document.getElementById('cases-webhook-response-console');
     if (consoleEl) {
       consoleEl.style.color = 'var(--warning-amber)';
-      consoleEl.textContent = `⏳ [Webhook Signature Verification] HMAC SHA256 mapping verified. Dispatching secure POST to GPEG webhook...`;
+      consoleEl.textContent = `⏳ [Secure Webhook Ingestion] Dispatching mock CRM ticket payload E2E to secure developer gateway...`;
     }
 
-    const response = await fetch('/api/webhook', {
+    const response = await fetch('/api/sandbox/trigger-webhook', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Connect-Token': 'secret_connect_gpeg_2026',
-        'X-Connect-Signature': signature
+        'Content-Type': 'application/json'
       },
       body: payloadString
     });
@@ -1154,8 +1150,8 @@ window.triggerConnectTicketCreation = async function() {
           event: "ticket.created",
           statusCode: 200,
           message: "Webhook verified & ingested persistently in SQLite Spanner",
-          clientToken: "secret_connect_gpeg_2026",
-          hmacSignature: signature,
+          clientToken: result.clientToken,
+          hmacSignature: result.hmacSignature,
           syncedRecord: result.camp
         }, null, 2);
       }
