@@ -8,7 +8,7 @@ import sqlite3
 import re
 from email.message import EmailMessage
 
-PORT = 8081
+PORT = 8080
 DB_FILE = 'camps.db'
 
 # Webhook Secret Keys (loaded from Environment variables with fallback defaults)
@@ -23,6 +23,23 @@ def get_session_from_headers(headers):
     if not session_token or session_token not in sessions_db:
         return None
     return sessions_db[session_token]
+
+# Server-Side RBAC Authorization Helpers
+def is_authorized(session, authorized_roles):
+    if not session:
+        return False
+    user_role = session.get('role')
+    return user_role in authorized_roles
+
+def send_rbac_denied(handler, message):
+    handler.send_response(403)
+    handler.send_header('Content-Type', 'application/json')
+    handler.end_headers()
+    handler.wfile.write(json.dumps({
+        "status": "forbidden",
+        "error": "Permission Denied (RBAC Enforcement)",
+        "message": message
+    }).encode('utf-8'))
 
 # Initialize database tables and schemas
 def init_db():
@@ -1104,6 +1121,9 @@ class CampsBackendHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         if kickoff_match:
+            if not is_authorized(session, ['Organizer', 'Admin']):
+                send_rbac_denied(self, "Only Program Coordinators (Organizer) or Administrators (Admin) can schedule and kickoff campaigns.")
+                return
             case_id = kickoff_match.group(1)
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
@@ -1238,6 +1258,9 @@ class CampsBackendHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         elif sync_match:
+            if not is_authorized(session, ['Presenter', 'Organizer', 'Admin']):
+                send_rbac_denied(self, "Only Lead Presenters, Program Coordinators, or Portal Administrators are authorized to trigger Workspace synchronizations.")
+                return
             case_id = sync_match.group(1)
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
@@ -1259,6 +1282,9 @@ class CampsBackendHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         elif archive_match:
+            if not is_authorized(session, ['Presenter', 'Organizer', 'Admin']):
+                send_rbac_denied(self, "Only Lead Presenters, Program Coordinators, or Portal Administrators are authorized to archive recording telemetries.")
+                return
             case_id = archive_match.group(1)
             try:
                 archive_recording_status(case_id)
@@ -1362,6 +1388,9 @@ class CampsBackendHandler(http.server.SimpleHTTPRequestHandler):
 
         # Expose /api/buganizer/resolve POST PM webhook endpoint E2E
         elif self.path == '/api/buganizer/resolve':
+            if not is_authorized(session, ['PM', 'Admin']):
+                send_rbac_denied(self, "Only SME Product PMs (PM) or Portal Administrators are authorized to resolve escalated expert queue tickets.")
+                return
             content_length = int(self.headers['Content-Length'])
             post_data = self.rfile.read(content_length)
             try:
